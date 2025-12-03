@@ -9,6 +9,7 @@
     "ant-charts-project"
   ],
   "scripts": {
+    "install:all": "npm install",
     "build:all": "npm run build -w recharts-project && npm run build -w nivo-project && npm run build -w ant-charts-project && npm run compare",
     "build:recharts": "npm run build -w recharts-project",
     "build:nivo": "npm run build -w nivo-project",
