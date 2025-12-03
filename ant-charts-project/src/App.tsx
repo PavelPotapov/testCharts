@@ -3,6 +3,9 @@ import LineChart from './components/LineChart'
 import PieChart from './components/PieChart'
 import AreaChart from './components/AreaChart'
 import ScatterChart from './components/ScatterChart'
+import RadarChart from './components/RadarChart'
+import HeatmapChart from './components/HeatmapChart'
+import TreemapChart from './components/TreemapChart'
 
 function App() {
   return (
@@ -24,9 +27,21 @@ function App() {
         <h2>Area Chart</h2>
         <AreaChart />
       </div>
-      <div>
+      <div style={{ marginBottom: '40px' }}>
         <h2>Scatter Chart</h2>
         <ScatterChart />
+      </div>
+      <div style={{ marginBottom: '40px' }}>
+        <h2>Radar Chart</h2>
+        <RadarChart />
+      </div>
+      <div style={{ marginBottom: '40px' }}>
+        <h2>Heatmap Chart</h2>
+        <HeatmapChart />
+      </div>
+      <div>
+        <h2>Treemap Chart</h2>
+        <TreemapChart />
       </div>
     </div>
   )
