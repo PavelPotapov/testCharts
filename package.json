@@ -1,0 +1,30 @@
+{
+  "name": "charts-comparison",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "workspaces": [
+    "recharts-project",
+    "nivo-project",
+    "ant-charts-project"
+  ],
+  "scripts": {
+    "build:all": "npm run build -w recharts-project && npm run build -w nivo-project && npm run build -w ant-charts-project && npm run compare",
+    "build:recharts": "npm run build -w recharts-project",
+    "build:nivo": "npm run build -w nivo-project",
+    "build:ant": "npm run build -w ant-charts-project",
+    "compare": "node compare-bundles.js"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "@vitejs/plugin-react": "^4.2.1",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.8"
+  }
+}
+
