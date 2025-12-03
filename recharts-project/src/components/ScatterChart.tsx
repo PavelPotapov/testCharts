@@ -26,3 +26,4 @@ const ScatterChart: React.FC = () => {
 
 export default ScatterChart
 
+

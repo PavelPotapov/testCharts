@@ -34,3 +34,4 @@ const AreaChart: React.FC = () => {
 
 export default AreaChart
 
+

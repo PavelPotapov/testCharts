@@ -2,6 +2,11 @@
   "name": "charts-comparison",
   "private": true,
   "version": "1.0.0",
+  "author": "PavelPotapov",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PavelPotapov/testCharts"
+  },
   "type": "module",
   "workspaces": [
     "recharts-project",
@@ -9,7 +14,8 @@
     "ant-charts-project"
   ],
   "scripts": {
-    "install:all": "npm install",
+    "install:all": "npm install --workspaces",
+    "dev:all": "concurrently \"npm run dev -w recharts-project\" \"npm run dev -w nivo-project\" \"npm run dev -w ant-charts-project\"",
     "build:all": "npm run build -w recharts-project && npm run build -w nivo-project && npm run build -w ant-charts-project && npm run compare",
     "build:recharts": "npm run build -w recharts-project",
     "build:nivo": "npm run build -w nivo-project",
@@ -24,6 +30,7 @@
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
     "@vitejs/plugin-react": "^4.2.1",
+    "concurrently": "^8.2.2",
     "typescript": "^5.2.2",
     "vite": "^5.0.8"
   }
