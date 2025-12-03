@@ -47,25 +47,41 @@ async function compareBundles() {
       const totalSize = await getDirSize(distPath)
       const assetsPath = join(distPath, 'assets')
       
-      let jsSize = '0'
-      let cssSize = '0'
+      let jsSize = 0
+      let cssSize = 0
+      let htmlSize = 0
+      
+      // Размер HTML файла
+      const htmlPath = join(distPath, 'index.html')
+      try {
+        htmlSize = parseFloat(await getFileSize(htmlPath))
+      } catch {
+        // HTML может не существовать
+      }
       
       try {
         const assets = await readdir(assetsPath)
         for (const asset of assets) {
+          const assetPath = join(assetsPath, asset)
+          const fileSize = parseFloat(await getFileSize(assetPath))
           if (asset.endsWith('.js')) {
-            jsSize = await getFileSize(join(assetsPath, asset))
+            jsSize += fileSize
           } else if (asset.endsWith('.css')) {
-            cssSize = await getFileSize(join(assetsPath, asset))
+            cssSize += fileSize
           }
         }
       } catch {
         // assets папка может не существовать
       }
+      
+      // Общий размер = HTML + JS + CSS
+      const totalActual = (htmlSize + jsSize + cssSize).toFixed(2)
+      jsSize = jsSize.toFixed(2)
+      cssSize = cssSize.toFixed(2)
 
       results.push({
         project,
-        total: totalSize,
+        total: totalActual,
         js: jsSize,
         css: cssSize,
       })
@@ -86,10 +102,10 @@ async function compareBundles() {
     
     console.log('└─────────────────────┴──────────┴──────────┴──────────┘\n')
     
-    // Находим минимальный размер
-    const minTotal = Math.min(...results.map(r => parseFloat(r.total)))
-    const winner = results.find(r => parseFloat(r.total) === minTotal)
-    console.log(`🏆 Самый легкий бандл: ${winner.project} (${winner.total} KB)`)
+    // Находим минимальный размер (по JS, так как это основной бандл)
+    const minJs = Math.min(...results.map(r => parseFloat(r.js)))
+    const winner = results.find(r => parseFloat(r.js) === minJs)
+    console.log(`🏆 Самый легкий JS бандл: ${winner.project} (${winner.js} KB)`)
   }
 }
 
