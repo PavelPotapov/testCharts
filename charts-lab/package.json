@@ -1,0 +1,60 @@
+{
+  "name": "@chart-lab/charts",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "sideEffects": false,
+  "packageManager": "pnpm@10.30.3",
+  "exports": {
+    "./line": {
+      "types": "./lib/line.d.ts",
+      "import": "./lib/line.js"
+    },
+    "./area": {
+      "types": "./lib/area.d.ts",
+      "import": "./lib/area.js"
+    },
+    "./bar": {
+      "types": "./lib/bar.d.ts",
+      "import": "./lib/bar.js"
+    },
+    "./pie": {
+      "types": "./lib/pie.d.ts",
+      "import": "./lib/pie.js"
+    },
+    "./radar": {
+      "types": "./lib/radar.d.ts",
+      "import": "./lib/radar.js"
+    },
+    "./scatter": {
+      "types": "./lib/scatter.d.ts",
+      "import": "./lib/scatter.js"
+    },
+    "./treemap": {
+      "types": "./lib/treemap.d.ts",
+      "import": "./lib/treemap.js"
+    }
+  },
+  "scripts": {
+    "build:lib": "tsc -p tsconfig.lib.json",
+    "dev": "pnpm run build:lib && vite --host 127.0.0.1",
+    "build": "pnpm run build:lib && tsc -p tsconfig.json && vite build",
+    "measure": "pnpm run build:lib && node scripts/measure.mjs"
+  },
+  "dependencies": {
+    "recharts": "3.11.0",
+    "react-is": "18.3.1"
+  },
+  "peerDependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "@types/react": "18.3.27",
+    "@types/react-dom": "18.3.7",
+    "typescript": "5.9.3",
+    "vite": "6.4.1"
+  }
+}

@@ -1,0 +1,132 @@
+[
+  {
+    "mode": "react",
+    "bytes": 141872,
+    "gzip": 45539,
+    "wrappers": [],
+    "engines": []
+  },
+  {
+    "mode": "line",
+    "bytes": 584719,
+    "gzip": 172682,
+    "wrappers": [
+      "line"
+    ],
+    "engines": [
+      "CartesianChart",
+      "CategoricalChart",
+      "LineChart",
+      "RechartsWrapper"
+    ]
+  },
+  {
+    "mode": "area",
+    "bytes": 571756,
+    "gzip": 169473,
+    "wrappers": [
+      "area"
+    ],
+    "engines": [
+      "AreaChart",
+      "CartesianChart",
+      "CategoricalChart",
+      "RechartsWrapper"
+    ]
+  },
+  {
+    "mode": "bar",
+    "bytes": 580668,
+    "gzip": 172269,
+    "wrappers": [
+      "bar"
+    ],
+    "engines": [
+      "BarChart",
+      "CartesianChart",
+      "CategoricalChart",
+      "RechartsWrapper"
+    ]
+  },
+  {
+    "mode": "pie",
+    "bytes": 519947,
+    "gzip": 157312,
+    "wrappers": [
+      "pie"
+    ],
+    "engines": [
+      "CategoricalChart",
+      "PieChart",
+      "PolarChart",
+      "RechartsWrapper"
+    ]
+  },
+  {
+    "mode": "radar",
+    "bytes": 545520,
+    "gzip": 162432,
+    "wrappers": [
+      "radar"
+    ],
+    "engines": [
+      "CategoricalChart",
+      "PolarChart",
+      "RadarChart",
+      "RechartsWrapper"
+    ]
+  },
+  {
+    "mode": "scatter",
+    "bytes": 564355,
+    "gzip": 168499,
+    "wrappers": [
+      "scatter"
+    ],
+    "engines": [
+      "CartesianChart",
+      "CategoricalChart",
+      "RechartsWrapper",
+      "ScatterChart"
+    ]
+  },
+  {
+    "mode": "treemap",
+    "bytes": 508467,
+    "gzip": 155250,
+    "wrappers": [
+      "treemap"
+    ],
+    "engines": [
+      "RechartsWrapper",
+      "Treemap"
+    ]
+  },
+  {
+    "mode": "all",
+    "bytes": 731021,
+    "gzip": 210526,
+    "wrappers": [
+      "line",
+      "area",
+      "bar",
+      "pie",
+      "radar",
+      "scatter",
+      "treemap"
+    ],
+    "engines": [
+      "AreaChart",
+      "BarChart",
+      "CartesianChart",
+      "CategoricalChart",
+      "LineChart",
+      "PieChart",
+      "PolarChart",
+      "RadarChart",
+      "RechartsWrapper",
+      "ScatterChart",
+      "Treemap"
+    ]
+  }
+]

@@ -1,5 +1,7 @@
 # Исследование библиотек графиков
 
+[Интерактивный стенд Recharts](https://pavelpotapov.github.io/testCharts/) · [Исследование кастомизации и API](charts-lab/RESEARCH.md) · [Запуск и проверка размера импорта](charts-lab/README.md)
+
 Проект для сравнения размеров бандлов трех библиотек графиков:
 - **Recharts**
 - **Nivo**
