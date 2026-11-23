@@ -7,14 +7,7 @@ import {
   CartesianGrid,
   Tooltip,
 } from 'recharts';
-import {
-  Frame,
-  animation,
-  axis,
-  gridColor,
-  margin,
-  tooltipStyle,
-} from './shared.js';
+import { Frame, animation, margin, useChartStyles } from './shared.js';
 import type { FrameProps } from './shared.js';
 export interface Point {
   x: number;
@@ -33,26 +26,31 @@ export function ScatterChart({
   title,
   height,
   motion,
+  chartTheme,
   grid = true,
   color,
   maxArea = 320,
   shape = 'circle',
 }: ScatterChartProps) {
+  const styles = useChartStyles(chartTheme);
   return (
-    <Frame title={title} height={height}>
+    <Frame title={title} height={height} chartTheme={chartTheme}>
       <Engine margin={margin}>
-        {grid && <CartesianGrid stroke={gridColor} strokeDasharray="3 5" />}
-        <XAxis {...axis} dataKey="x" type="number" name="X" />
-        <YAxis {...axis} width={42} dataKey="y" type="number" name="Y" />
+        {grid && (
+          <CartesianGrid stroke={styles.gridStroke} strokeDasharray="3 5" />
+        )}
+        <XAxis {...styles.axis} dataKey="x" type="number" name="X" />
+        <YAxis {...styles.axis} width={42} dataKey="y" type="number" name="Y" />
         <ZAxis dataKey="z" type="number" name="Z" range={[25, maxArea]} />
         <Scatter
           data={data}
           fill={color}
+          stroke={color}
           fillOpacity={0.8}
           shape={shape}
           {...animation(motion)}
         />
-        <Tooltip contentStyle={tooltipStyle} />
+        <Tooltip {...styles.tooltip} />
       </Engine>
     </Frame>
   );

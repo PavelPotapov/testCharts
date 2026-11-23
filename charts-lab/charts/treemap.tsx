@@ -1,7 +1,12 @@
 import { Treemap, Tooltip } from 'recharts';
-import { Frame, animation, tooltipStyle } from './shared.js';
+import { Frame, animation, useChartStyles } from './shared.js';
 import type { FrameProps } from './shared.js';
-export type TreeItem = { name: string; size?: number; children?: TreeItem[] };
+export type TreeItem = {
+  name: string;
+  size?: number;
+  color?: string;
+  children?: TreeItem[];
+};
 export interface TreemapChartProps extends FrameProps {
   data: TreeItem[];
   color: string;
@@ -13,12 +18,14 @@ export function TreemapChart({
   title,
   height,
   motion,
+  chartTheme,
   color,
   ratio = 1.6,
   strokeWidth = 3,
 }: TreemapChartProps) {
+  const styles = useChartStyles(chartTheme);
   return (
-    <Frame title={title} height={height}>
+    <Frame title={title} height={height} chartTheme={chartTheme}>
       <Treemap
         data={data}
         dataKey="size"
@@ -33,6 +40,7 @@ export function TreemapChart({
           value,
           depth,
           children,
+          color: tileColor,
         }) =>
           depth === 0 || children?.length ? (
             <g />
@@ -43,12 +51,22 @@ export function TreemapChart({
                 y={y}
                 width={width}
                 height={tileHeight}
-                fill={color}
-                stroke="white"
+                className="treemap-cell"
+                fill={typeof tileColor === 'string' ? tileColor : color}
+                stroke={styles.surface}
                 strokeWidth={strokeWidth}
               />
               {width > 95 && tileHeight > 52 && (
-                <text x={x + 12} y={y + 25} fill="white" fontSize={14}>
+                <text
+                  x={x + 12}
+                  y={y + 25}
+                  fill={styles.text ?? 'white'}
+                  fontSize={14}
+                  stroke={styles.text ? styles.surface : undefined}
+                  strokeWidth={4}
+                  strokeLinejoin="round"
+                  paintOrder="stroke"
+                >
                   {String(name)} · {value}
                 </text>
               )}
@@ -57,7 +75,7 @@ export function TreemapChart({
         }
         {...animation(motion)}
       >
-        <Tooltip contentStyle={tooltipStyle} />
+        <Tooltip {...styles.tooltip} />
       </Treemap>
     </Frame>
   );

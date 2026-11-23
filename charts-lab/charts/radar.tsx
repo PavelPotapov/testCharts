@@ -6,7 +6,7 @@ import {
   PolarRadiusAxis,
   Tooltip,
 } from 'recharts';
-import { Frame, animation, axis, gridColor, tooltipStyle } from './shared.js';
+import { Frame, animation, useChartStyles } from './shared.js';
 import type { CartesianProps } from './shared.js';
 export interface RadarChartProps extends CartesianProps {
   opacity?: number;
@@ -20,30 +20,32 @@ export function RadarChart({
   title,
   height,
   motion,
+  chartTheme,
   grid = true,
   opacity = 0.2,
   strokeWidth = 2,
   gridType = 'polygon',
 }: RadarChartProps) {
+  const styles = useChartStyles(chartTheme);
   return (
-    <Frame title={title} height={height}>
+    <Frame title={title} height={height} chartTheme={chartTheme}>
       <Engine data={data} outerRadius="78%">
-        {grid && <PolarGrid gridType={gridType} stroke={gridColor} />}
-        <PolarAngleAxis dataKey={categoryKey} tick={axis.tick} />
+        {grid && <PolarGrid gridType={gridType} stroke={styles.gridStroke} />}
+        <PolarAngleAxis dataKey={categoryKey} tick={styles.axis.tick} />
         <PolarRadiusAxis axisLine={false} tick={false} />
         {series.map((s) => (
           <Radar
             key={s.key}
             name={s.label}
             dataKey={s.key}
-            stroke={s.color}
+            stroke={s.strokeColor ?? s.color}
             fill={s.color}
             fillOpacity={opacity}
             strokeWidth={strokeWidth}
             {...animation(motion)}
           />
         ))}
-        <Tooltip contentStyle={tooltipStyle} />
+        <Tooltip {...styles.tooltip} />
       </Engine>
     </Frame>
   );

@@ -1,10 +1,11 @@
 import { Pie, PieChart as Engine, Tooltip } from 'recharts';
-import { Frame, animation, tooltipStyle } from './shared.js';
+import { Frame, animation, useChartStyles } from './shared.js';
 import type { FrameProps } from './shared.js';
 export interface Slice {
   name: string;
   value: number;
   color: string;
+  strokeColor?: string;
 }
 export interface PieChartProps extends FrameProps {
   data: Slice[];
@@ -17,13 +18,19 @@ export function PieChart({
   title,
   height,
   motion,
+  chartTheme,
   hole = 54,
   gap = 3,
   startAngle = 90,
 }: PieChartProps) {
+  const styles = useChartStyles(chartTheme);
   const slices = data
     .filter((slice) => slice.value > 0)
-    .map((slice) => ({ ...slice, fill: slice.color }));
+    .map((slice) => ({
+      ...slice,
+      fill: slice.color,
+      stroke: slice.strokeColor ?? 'none',
+    }));
   if (!slices.length) {
     return (
       <div
@@ -35,7 +42,7 @@ export function PieChart({
     );
   }
   return (
-    <Frame title={title} height={height}>
+    <Frame title={title} height={height} chartTheme={chartTheme}>
       <Engine>
         <Pie
           data={slices}
@@ -49,7 +56,7 @@ export function PieChart({
           stroke="none"
           {...animation(motion)}
         />
-        <Tooltip contentStyle={tooltipStyle} />
+        <Tooltip {...styles.tooltip} />
       </Engine>
     </Frame>
   );

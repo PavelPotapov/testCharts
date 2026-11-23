@@ -8,8 +8,8 @@
   },
   {
     "mode": "line",
-    "bytes": 584719,
-    "gzip": 172682,
+    "bytes": 586698,
+    "gzip": 173375,
     "wrappers": [
       "line"
     ],
@@ -22,8 +22,8 @@
   },
   {
     "mode": "area",
-    "bytes": 571756,
-    "gzip": 169473,
+    "bytes": 573904,
+    "gzip": 170193,
     "wrappers": [
       "area"
     ],
@@ -36,8 +36,8 @@
   },
   {
     "mode": "bar",
-    "bytes": 580668,
-    "gzip": 172269,
+    "bytes": 582826,
+    "gzip": 173058,
     "wrappers": [
       "bar"
     ],
@@ -50,8 +50,8 @@
   },
   {
     "mode": "pie",
-    "bytes": 519947,
-    "gzip": 157312,
+    "bytes": 522210,
+    "gzip": 158142,
     "wrappers": [
       "pie"
     ],
@@ -64,8 +64,8 @@
   },
   {
     "mode": "radar",
-    "bytes": 545520,
-    "gzip": 162432,
+    "bytes": 547699,
+    "gzip": 163204,
     "wrappers": [
       "radar"
     ],
@@ -78,8 +78,8 @@
   },
   {
     "mode": "scatter",
-    "bytes": 564355,
-    "gzip": 168499,
+    "bytes": 566495,
+    "gzip": 169233,
     "wrappers": [
       "scatter"
     ],
@@ -92,8 +92,8 @@
   },
   {
     "mode": "treemap",
-    "bytes": 508467,
-    "gzip": 155250,
+    "bytes": 510859,
+    "gzip": 156098,
     "wrappers": [
       "treemap"
     ],
@@ -104,8 +104,8 @@
   },
   {
     "mode": "all",
-    "bytes": 731021,
-    "gzip": 210526,
+    "bytes": 733541,
+    "gzip": 211339,
     "wrappers": [
       "line",
       "area",

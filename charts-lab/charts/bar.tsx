@@ -8,14 +8,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import {
-  Frame,
-  animation,
-  axis,
-  gridColor,
-  margin,
-  tooltipStyle,
-} from './shared.js';
+import { Frame, animation, margin, useChartStyles } from './shared.js';
 import type { CartesianProps } from './shared.js';
 
 export interface BarChartProps extends CartesianProps {
@@ -31,12 +24,14 @@ export function BarChart({
   title,
   height,
   motion,
+  chartTheme,
   grid = true,
   barSize = 16,
   radius = 4,
   horizontal = false,
   stacked = false,
 }: BarChartProps) {
+  const styles = useChartStyles(chartTheme);
   const hasNegativeValues = data.some((row) =>
     series.some(({ key }) => {
       const value = row[key];
@@ -49,13 +44,14 @@ export function BarChart({
       dataKey={s.key}
       name={s.label}
       fill={s.color}
+      stroke={s.strokeColor}
       barSize={barSize}
       radius={stacked ? undefined : radius}
       {...animation(motion)}
     />
   ));
   return (
-    <Frame title={title} height={height}>
+    <Frame title={title} height={height} chartTheme={chartTheme}>
       <Engine
         data={data}
         margin={margin}
@@ -64,19 +60,19 @@ export function BarChart({
       >
         {grid && (
           <CartesianGrid
-            stroke={gridColor}
+            stroke={styles.gridStroke}
             strokeDasharray="3 5"
             vertical={horizontal}
             horizontal={!horizontal}
           />
         )}
         <XAxis
-          {...axis}
+          {...styles.axis}
           type={horizontal ? 'number' : 'category'}
           dataKey={horizontal ? undefined : categoryKey}
         />
         <YAxis
-          {...axis}
+          {...styles.axis}
           width={44}
           type={horizontal ? 'category' : 'number'}
           dataKey={horizontal ? categoryKey : undefined}
@@ -85,10 +81,10 @@ export function BarChart({
           <ReferenceLine
             x={horizontal ? 0 : undefined}
             y={horizontal ? undefined : 0}
-            stroke="#61766e"
+            stroke={styles.referenceStroke}
           />
         )}
-        <Tooltip contentStyle={tooltipStyle} />
+        <Tooltip {...styles.tooltip} />
         {stacked ? <BarStack radius={radius}>{bars}</BarStack> : bars}
       </Engine>
     </Frame>

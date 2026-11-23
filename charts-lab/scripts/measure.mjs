@@ -5,7 +5,9 @@ import { readFileSync, writeFileSync } from 'node:fs';
 const manifest = JSON.parse(
   readFileSync(new URL('../package.json', import.meta.url))
 );
-const kinds = Object.keys(manifest.exports).map((path) => path.slice(2));
+const kinds = Object.keys(manifest.exports)
+  .filter((path) => path !== './theme')
+  .map((path) => path.slice(2));
 const results = [];
 for (const mode of ['react', ...kinds, 'all']) {
   const selected = mode === 'react' ? [] : mode === 'all' ? kinds : [mode];
@@ -15,12 +17,20 @@ for (const mode of ['react', ...kinds, 'all']) {
   const components = selected.map(
     (key, i) => `C${i}.${key[0].toUpperCase() + key.slice(1)}Chart`
   );
+  const withTheme = selected.length > 0;
+  const themeImport = withTheme
+    ? "import { chartThemes } from '@chart-lab/charts/theme';"
+    : '';
+  const chartProps = withTheme
+    ? '{ ...window.exampleProps, chartTheme: chartThemes[window.theme] }'
+    : 'window.exampleProps';
   const entry = `${imports}
+    ${themeImport}
     import { createRoot } from 'react-dom/client';
     import { createElement } from 'react';
     const charts = [${components.join(',')}];
     const component = charts[window.exampleIndex] || 'div';
-    createRoot(document.body).render(createElement(component, window.exampleProps));`;
+    createRoot(document.body).render(createElement(component, ${chartProps}));`;
   const result = await build({
     configFile: false,
     logLevel: 'silent',

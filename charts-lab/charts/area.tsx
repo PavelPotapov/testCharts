@@ -6,14 +6,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import {
-  Frame,
-  animation,
-  axis,
-  gridColor,
-  margin,
-  tooltipStyle,
-} from './shared.js';
+import { Frame, animation, margin, useChartStyles } from './shared.js';
 import type { CartesianProps } from './shared.js';
 
 export interface AreaChartProps extends CartesianProps {
@@ -29,32 +22,34 @@ export function AreaChart({
   title,
   height,
   motion,
+  chartTheme,
   grid = true,
   strokeWidth = 3,
   curve = 'monotone',
   opacity = 0.2,
   stacked = false,
 }: AreaChartProps) {
+  const styles = useChartStyles(chartTheme);
   return (
-    <Frame title={title} height={height}>
+    <Frame title={title} height={height} chartTheme={chartTheme}>
       <Engine data={data} margin={margin}>
         {grid && (
           <CartesianGrid
-            stroke={gridColor}
+            stroke={styles.gridStroke}
             strokeDasharray="3 5"
             vertical={false}
           />
         )}
-        <XAxis {...axis} dataKey={categoryKey} />
-        <YAxis {...axis} width={42} />
-        <Tooltip contentStyle={tooltipStyle} />
+        <XAxis {...styles.axis} dataKey={categoryKey} />
+        <YAxis {...styles.axis} width={42} />
+        <Tooltip {...styles.tooltip} />
         {series.map((s) => (
           <Area
             key={s.key}
             dataKey={s.key}
             name={s.label}
             type={curve}
-            stroke={s.color}
+            stroke={s.strokeColor ?? s.color}
             strokeWidth={strokeWidth}
             fill={s.color}
             fillOpacity={opacity}

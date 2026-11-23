@@ -4,22 +4,19 @@ import {
   Legend,
   Line,
   LineChart as Engine,
-  RechartsThemeProvider,
   Tooltip,
   XAxis,
   YAxis,
   matchByDataKey,
   useRechartsTheme,
-  type RechartsTheme,
   type TooltipContentProps,
 } from 'recharts';
 import {
   Frame,
   animation,
-  axis,
-  gridColor,
   margin,
   tooltipStyle,
+  useChartStyles,
 } from './shared.js';
 import type { CartesianProps, Series } from './shared.js';
 
@@ -37,7 +34,6 @@ export interface LineChartProps extends Omit<CartesianProps, 'series'> {
   connectNulls?: boolean;
   tooltip?: TooltipOptions;
   legendPosition?: 'top' | 'bottom';
-  chartTheme?: RechartsTheme;
   animationKey?: string;
 }
 
@@ -105,29 +101,26 @@ export function LineChart({
   chartTheme,
   animationKey,
 }: LineChartProps) {
-  const inheritedTheme = useRechartsTheme();
-  const themed = chartTheme || inheritedTheme;
-  const lineAxis = themed ? { ...axis, tick: { fontSize: 12 } } : axis;
+  const styles = useChartStyles(chartTheme);
   const matchPoints = useMemo(
     () => (animationKey ? matchByDataKey(animationKey) : undefined),
     [animationKey]
   );
   const lineMotion = animation(motion);
-  const chart = (
-    <Frame title={title} height={height}>
+  return (
+    <Frame title={title} height={height} chartTheme={chartTheme}>
       <Engine data={data} margin={margin} aria-label={title}>
         {grid && (
           <CartesianGrid
-            stroke={themed ? undefined : gridColor}
+            stroke={styles.gridStroke}
             strokeDasharray="3 5"
             vertical={false}
           />
         )}
-        <XAxis {...lineAxis} dataKey={categoryKey} />
-        <YAxis {...lineAxis} width={42} />
+        <XAxis {...styles.axis} dataKey={categoryKey} />
+        <YAxis {...styles.axis} width={42} />
         <Tooltip
-          contentStyle={themed ? undefined : tooltipStyle}
-          itemStyle={themed?.typography}
+          {...styles.tooltip}
           isAnimationActive={lineMotion.isAnimationActive}
           formatter={
             tooltip && !tooltip.compare
@@ -161,10 +154,5 @@ export function LineChart({
         ))}
       </Engine>
     </Frame>
-  );
-  return chartTheme ? (
-    <RechartsThemeProvider value={chartTheme}>{chart}</RechartsThemeProvider>
-  ) : (
-    chart
   );
 }

@@ -1,14 +1,12 @@
 :root {
   font-family: Inter, 'Segoe UI', sans-serif;
-  color: #162d29;
-  background: #f4f6f3;
   font-synthesis: none;
-  --ink: #163731;
-  --accent: #147d72;
-  --muted: #526963;
-  --border: #d7e1dc;
-  --chart-axis: #546c65;
-  --chart-grid: #d9e4de;
+}
+.lab {
+  min-height: 100vh;
+  color: var(--ink);
+  background: var(--page);
+  --muted: var(--ink);
 }
 * {
   box-sizing: border-box;
@@ -35,8 +33,15 @@ button:disabled {
   cursor: default;
 }
 a {
-  color: #116a5e;
+  color: var(--ink);
+  text-decoration-color: var(--accent);
   text-underline-offset: 3px;
+}
+:focus-visible {
+  outline: 2px solid var(--accent);
+}
+.canvas svg[tabindex='0']:focus-visible {
+  outline-offset: -2px;
 }
 button {
   color: var(--ink);
@@ -46,8 +51,8 @@ button {
   margin: auto;
 }
 .mast {
-  background: #18332f;
-  color: white;
+  background: var(--header);
+  border-bottom: 1px solid var(--border);
 }
 .mastin {
   display: flex;
@@ -63,7 +68,6 @@ button {
   letter-spacing: -0.025em;
 }
 .mast a {
-  color: #eff7f2;
   font-size: 0.9rem;
 }
 .mark {
@@ -76,7 +80,7 @@ button {
 .mark i {
   display: block;
   width: 5px;
-  background: #a6d6aa;
+  background: var(--accent);
   border-radius: 2px 2px 0 0;
 }
 .mark i:nth-child(1) {
@@ -155,13 +159,13 @@ h1 {
   font-size: 0.89rem;
   border: 1px solid var(--border);
   border-radius: 7px;
-  background: #fff;
+  background: var(--surface);
   padding: 8px 13px;
 }
 .types button[aria-pressed='true'] {
-  background: var(--ink);
-  color: white;
-  border-color: var(--ink);
+  background: var(--header);
+  color: var(--ink);
+  border-color: var(--accent);
 }
 button:hover:not(:disabled) {
   filter: brightness(0.94);
@@ -181,7 +185,7 @@ button:hover:not(:disabled) {
 .panel {
   border: 1px solid var(--border);
   border-radius: 13px;
-  background: #fff;
+  background: var(--surface);
   overflow: hidden;
 }
 .panel header {
@@ -191,8 +195,9 @@ button:hover:not(:disabled) {
   gap: 12px;
 }
 .plot header {
-  padding: 25px 25px 3px;
+  padding: 25px 25px 16px;
   align-items: flex-start;
+  background: var(--header);
 }
 .plot h2 {
   font-size: clamp(1.5rem, 2.4vw, 2.05rem);
@@ -271,6 +276,38 @@ fieldset label,
   display: flex;
   gap: 6px;
   align-items: center;
+  padding: 0 5px;
+  border-radius: 5px;
+  background: var(--editable);
+}
+.palette-tokens {
+  margin: 10px 0;
+  font-size: 0.81rem;
+}
+.palette-tokens div,
+.palette-tokens dt,
+.palette-sources {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.palette-tokens div {
+  justify-content: space-between;
+  flex-wrap: wrap;
+  min-height: 24px;
+}
+.palette-tokens dd {
+  margin: 0;
+}
+.palette-tokens i {
+  width: 13px;
+  height: 13px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+}
+.palette-sources {
+  flex-wrap: wrap;
+  column-gap: 12px;
 }
 .color code,
 .range output {
@@ -306,7 +343,7 @@ input[type='color'] {
 }
 select {
   border: 1px solid var(--border);
-  background: white;
+  background: var(--surface);
   color: var(--ink);
   border-radius: 5px;
   padding: 3px 5px;
@@ -340,8 +377,8 @@ input[type='checkbox'] {
 }
 pre {
   margin: 0;
-  background: #20332f;
-  color: #d7ebdb;
+  background: var(--code-background);
+  color: var(--code-text);
   padding: 20px 22px;
   line-height: 1.7;
   overflow: auto;
@@ -386,7 +423,7 @@ th {
   border-bottom: 1px solid var(--border);
 }
 thead {
-  background: #edf3ef;
+  background: var(--header);
 }
 td {
   line-height: 1.5;
@@ -420,7 +457,7 @@ td {
     padding: 15px 0;
   }
   .plot header {
-    padding: 16px 15px 0;
+    padding: 16px 15px 12px;
   }
   .canvas {
     margin: 12px 7px 6px;

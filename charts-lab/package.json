@@ -33,6 +33,10 @@
     "./treemap": {
       "types": "./lib/treemap.d.ts",
       "import": "./lib/treemap.js"
+    },
+    "./theme": {
+      "types": "./lib/theme.d.ts",
+      "import": "./lib/theme.js"
     }
   },
   "scripts": {

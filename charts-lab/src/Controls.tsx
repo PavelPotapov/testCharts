@@ -1,4 +1,6 @@
 import { defaults, type Kind, type Settings } from './catalog';
+import { chartColors, dataTokens } from '@chart-lab/charts/theme';
+import { channelTokens, sddsSource, tableSource } from './palette';
 
 type Props = {
   kind: Kind;
@@ -69,21 +71,41 @@ export function Controls({ kind, settings: s, onChange }: Props) {
       </select>
     </div>
   );
-  const color = (key: 'color' | 'secondary' | 'lineColor', label: string) => (
+  const color = (
+    key: 'color' | 'secondary' | 'lineColor',
+    label: string,
+    fallback: string
+  ) => (
     <label className="color">
       {label}
       <span>
         <input
           type="color"
-          value={s[key]}
+          aria-label={label}
+          value={(s[key] || fallback).toLowerCase()}
           onChange={(e) => set(key, e.target.value)}
         />
-        <code>{s[key].toUpperCase()}</code>
+        <code>{(s[key] || fallback).toUpperCase()}</code>
       </span>
     </label>
   );
-  const two = !['scatter', 'treemap'].includes(kind);
+  const colors = chartColors(s.theme);
+  const categories = kind === 'pie' || kind === 'treemap';
   const emptyPie = kind === 'pie' && s.pieEmpty;
+  type Token = keyof typeof dataTokens.light;
+  const tokens: [string, Token][] = categories
+    ? Object.entries(channelTokens)
+    : [
+        [kind === 'scatter' ? 'Точки' : 'Факт', 'data-blue'],
+        ...(kind === 'scatter'
+          ? []
+          : [
+              [
+                'План',
+                kind === 'line' ? colors.planLineToken : 'data-yellow',
+              ] as [string, Token],
+            ]),
+      ];
   return (
     <aside className="panel controls">
       <header>
@@ -92,30 +114,78 @@ export function Controls({ kind, settings: s, onChange }: Props) {
           Сбросить
         </button>
       </header>
-      {!emptyPie && (
-        <fieldset>
-          <legend>Палитра</legend>
-          {kind === 'line' ? (
-            <>
-              {select('lineTheme', 'Тема контейнера', [
-                ['light', 'Светлая'],
-                ['dark', 'Тёмная'],
-              ])}
-              {toggle('lineOverride', 'Свой цвет «Факт»')}
-              {s.lineOverride && color('lineColor', 'Цвет «Факт»')}
-              <p className="control-note">
-                Демонстрационная палитра <code>RechartsThemeProvider</code>.
-                Цвет серии задаётся через <code>stroke</code>.
-              </p>
-            </>
-          ) : (
-            <>
-              {color('color', two ? 'Первый цвет' : 'Цвет серии')}
-              {two && color('secondary', 'Второй цвет')}
-            </>
-          )}
-        </fieldset>
-      )}
+      <fieldset>
+        <legend>Палитра SDDS</legend>
+        {select('theme', 'Тема таблицы и графика', [
+          ['light', 'Светлая'],
+          ['dark', 'Тёмная'],
+        ])}
+        {!emptyPie && (
+          <dl className="palette-tokens">
+            {tokens.map(([label, token]) => {
+              const override =
+                kind === 'line'
+                  ? label === 'Факт' &&
+                    s.lineOverride &&
+                    (s.lineColor || colors.custom)
+                  : label === 'Факт' || label === 'Поиск' || label === 'Точки'
+                  ? s.color
+                  : label === 'План' || label === 'Партнёры'
+                  ? s.secondary
+                  : undefined;
+              const value = (
+                override || dataTokens[s.theme][token]
+              ).toUpperCase();
+              return (
+                <div key={token}>
+                  <dt>
+                    <i style={{ backgroundColor: value }} aria-hidden="true" />
+                    {label}
+                  </dt>
+                  <dd>
+                    <code>
+                      {override ? 'Свой цвет' : token} {value}
+                    </code>
+                  </dd>
+                </div>
+              );
+            })}
+          </dl>
+        )}
+        {kind === 'line' && (
+          <>
+            {toggle('lineOverride', 'Свой цвет «Факт»')}
+            {s.lineOverride && color('lineColor', 'Цвет «Факт»', colors.custom)}
+            <p className="control-note">
+              Свойство <code>stroke</code> переопределяет цвет из{' '}
+              <code>RechartsThemeProvider</code>.
+            </p>
+          </>
+        )}
+        {kind !== 'line' && !emptyPie && (
+          <>
+            {color(
+              'color',
+              categories
+                ? 'Цвет «Поиск»'
+                : kind === 'scatter'
+                ? 'Цвет серии'
+                : 'Цвет «Факт»',
+              colors.actual
+            )}
+            {kind !== 'scatter' &&
+              color(
+                'secondary',
+                categories ? 'Цвет «Партнёры»' : 'Цвет «План»',
+                colors.plan
+              )}
+          </>
+        )}
+        <p className="control-note palette-sources">
+          <a href={sddsSource}>Токены SDDS 0.2.1</a>
+          <a href={tableSource}>Цвета таблицы</a>
+        </p>
+      </fieldset>
       {kind === 'line' && (
         <fieldset>
           <legend>Легенда и подсказка</legend>

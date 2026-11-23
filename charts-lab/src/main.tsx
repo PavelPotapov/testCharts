@@ -2,6 +2,7 @@ import { Suspense, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { catalog, defaults, kinds, type Kind, type Settings } from './catalog';
 import { Controls } from './Controls';
+import { tableStyle } from './palette';
 import sizes from './sizes.json';
 import './style.css';
 
@@ -189,7 +190,7 @@ function Research() {
   );
 }
 function DataTable({ data }: { data: object[] }) {
-  const keys = Object.keys(data[0] ?? {});
+  const keys = [...new Set(data.flatMap((row) => Object.keys(row)))];
   return (
     <div className="scroll">
       <table>
@@ -203,9 +204,10 @@ function DataTable({ data }: { data: object[] }) {
         <tbody>
           {data.map((row, i) => (
             <tr key={i}>
-              {Object.values(row).map((v, j) => (
-                <td key={j}>{String(v)}</td>
-              ))}
+              {keys.map((key) => {
+                const value = (row as Record<string, unknown>)[key];
+                return <td key={key}>{value == null ? '—' : String(value)}</td>;
+              })}
             </tr>
           ))}
         </tbody>
@@ -220,16 +222,20 @@ function Lab() {
   const [tab, setTab] = useState('Пример кода');
   const [repeat, replay] = useState(0);
   const item = catalog[kind];
-  const { data, ...props } = item.props(s);
+  const { data, chartTheme: _theme, ...props } = item.props(s);
   const code =
     'import { ' +
     item.name +
     " } from '@chart-lab/charts/" +
     kind +
-    "';\n\n" +
+    "';\n" +
+    "import { chartThemes } from '@chart-lab/charts/theme';\n\n" +
     'export function Example() {\n  return <' +
     item.name +
     '\n    data={data}\n' +
+    '    chartTheme={chartThemes.' +
+    s.theme +
+    '}\n' +
     Object.entries(props)
       .filter(([, value]) => value !== undefined)
       .map(
@@ -246,17 +252,22 @@ function Lab() {
     data.map((row) => '  ' + JSON.stringify(row)).join(',\n') +
     '\n];';
   const series = 'series' in props ? props.series : null;
+  const categoryData =
+    kind === 'pie' && !s.pieEmpty
+      ? catalog.pie.props(s).data
+      : kind === 'treemap'
+      ? catalog.treemap.props(s).data
+      : [];
   const legend =
     kind === 'line'
       ? []
       : series ??
-        (kind === 'pie' && !s.pieEmpty
-          ? catalog.pie
-              .props(s)
-              .data.map((p) => ({ color: p.color, label: p.name }))
-          : []);
+        categoryData.map((entry) => ({
+          color: entry.color,
+          label: entry.name,
+        }));
   return (
-    <>
+    <div className="lab" style={tableStyle(s.theme)}>
       <header className="mast">
         <div className="wrap mastin">
           <div className="brand">
@@ -392,7 +403,7 @@ function Lab() {
           <Bundle />
         )}
       </main>
-    </>
+    </div>
   );
 }
 createRoot(document.getElementById('root')!).render(<Lab />);

@@ -1,4 +1,10 @@
 import { lazy, type ComponentType } from 'react';
+import {
+  chartColors,
+  chartThemes,
+  type ThemeName,
+} from '@chart-lab/charts/theme';
+import { channelPalette, type Channel } from './palette';
 import type { LineChartProps } from '@chart-lab/charts/line';
 import type { AreaChartProps } from '@chart-lab/charts/area';
 import type { BarChartProps } from '@chart-lab/charts/bar';
@@ -8,8 +14,8 @@ import type { ScatterChartProps } from '@chart-lab/charts/scatter';
 import type { TreemapChartProps } from '@chart-lab/charts/treemap';
 
 export const defaults = {
-  color: '#147d72',
-  secondary: '#c0783d',
+  color: '',
+  secondary: '',
   width: 3,
   height: 310,
   grid: true,
@@ -30,9 +36,9 @@ export const defaults = {
   maxArea: 340,
   shape: 'circle' as 'circle' | 'diamond' | 'square',
   ratio: 1.6,
-  lineTheme: 'light' as 'light' | 'dark',
+  theme: 'light' as ThemeName,
   lineOverride: false,
-  lineColor: '#ae58a8',
+  lineColor: '',
   legendPosition: 'bottom' as 'top' | 'bottom',
   tooltipKind: 'standard' as 'standard' | 'formatted' | 'comparison',
   lineMissing: false,
@@ -84,7 +90,7 @@ const mixedBars = monthly.map((row, index) => ({
   actual: [38, -16, 42, 58, -14, 0, 68, -33, 76, -29, 84, 98][index],
   plan: [30, 32, -39, 36, -27, 13, 46, 60, 64, -21, 0, 74][index],
 }));
-const segments = ['Поиск', 'Партнёры', 'Рассылки', 'Прямые'];
+const segments: Channel[] = ['Поиск', 'Партнёры', 'Рассылки', 'Прямые'];
 const total = [42, 27, 18, 13];
 const radar = [
   'Охват',
@@ -109,14 +115,28 @@ const motion = (s: Settings) => ({
   duration: s.duration,
   easing: s.easing,
 });
-const series = (s: Settings) => [
-  { key: 'actual', label: 'Факт', color: s.color },
-  { key: 'plan', label: 'План', color: s.secondary },
-];
+const series = (s: Settings) => {
+  const colors = chartColors(s.theme);
+  return [
+    { key: 'actual', label: 'Факт', color: s.color || colors.actual },
+    {
+      key: 'plan',
+      label: 'План',
+      color: s.secondary || colors.plan,
+      strokeColor: s.secondary ? undefined : colors.planStroke,
+    },
+  ];
+};
+const channelColor = (s: Settings, name: Channel) => {
+  const override =
+    name === 'Поиск' ? s.color : name === 'Партнёры' ? s.secondary : '';
+  return override ? { color: override } : channelPalette(s.theme, name);
+};
 const base = (s: Settings, title: string) => ({
   title,
   height: s.height,
   motion: motion(s),
+  chartTheme: chartThemes[s.theme],
 });
 const cart = (s: Settings) => ({
   ...base(s, 'Динамика продаж'),
@@ -125,50 +145,6 @@ const cart = (s: Settings) => ({
   series: series(s),
   grid: s.grid,
 });
-
-function demoTheme(
-  colors: [string, string],
-  surface: string,
-  text: string,
-  grid: string,
-  tooltipBackground: string
-): NonNullable<LineChartProps['chartTheme']> {
-  return {
-    graphicalItems: colors.map((stroke) => ({ stroke })),
-    chart: { backgroundColor: surface, borderRadius: 8 },
-    typography: { color: text },
-    axis: { stroke: text },
-    grid: { stroke: grid },
-    cursor: { stroke: text },
-    legend: { labelStyle: { color: text } },
-    tooltip: {
-      contentStyle: {
-        background: tooltipBackground,
-        border: '1px solid ' + grid,
-        borderRadius: 8,
-        color: text,
-        fontSize: 14,
-      },
-      labelStyle: { color: text },
-    },
-  };
-}
-const lineThemes = {
-  light: demoTheme(
-    ['#147d72', '#92501e'],
-    '#f0f8f5',
-    '#345c50',
-    '#a1b6ad',
-    '#fff'
-  ),
-  dark: demoTheme(
-    ['#6bd7bd', '#ffbe78'],
-    '#18312b',
-    '#d4e9e1',
-    '#647e75',
-    '#213e35'
-  ),
-};
 
 function example<P extends { title: string; data: object[] }>(
   name: string,
@@ -209,7 +185,9 @@ export const catalog = {
         {
           key: 'actual',
           label: 'Факт',
-          color: s.lineOverride ? s.lineColor : undefined,
+          color: s.lineOverride
+            ? s.lineColor || chartColors(s.theme).custom
+            : undefined,
         },
         { key: 'plan', label: 'План', dash: '6 4' },
       ],
@@ -226,7 +204,6 @@ export const catalog = {
               compare:
                 s.tooltipKind === 'comparison' ? ['actual', 'plan'] : undefined,
             },
-      chartTheme: lineThemes[s.lineTheme],
       animationKey: 'id',
     })
   ),
@@ -270,7 +247,7 @@ export const catalog = {
       data: segments.map((name, i) => ({
         name,
         value: s.pieEmpty ? 0 : total[i],
-        color: [s.color, s.secondary, '#7188bf', '#a6bc74'][i],
+        ...channelColor(s, name),
       })),
       hole: s.hole,
       gap: s.gap,
@@ -303,7 +280,7 @@ export const catalog = {
     (s) => ({
       ...base(s, 'Сравнение каналов'),
       data: points,
-      color: s.color,
+      color: s.color || chartColors(s.theme).actual,
       grid: s.grid,
       maxArea: s.maxArea,
       shape: s.shape,
@@ -317,8 +294,11 @@ export const catalog = {
     async () => (await import('@chart-lab/charts/treemap')).TreemapChart,
     (s) => ({
       ...base(s, 'Структура продаж'),
-      data: tree,
-      color: s.color,
+      data: tree.map((tile) => ({
+        ...tile,
+        color: channelColor(s, tile.name).color,
+      })),
+      color: s.color || chartColors(s.theme).actual,
       ratio: s.ratio,
       strokeWidth: s.width,
     })
