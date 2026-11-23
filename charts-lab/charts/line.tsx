@@ -4,7 +4,6 @@ import {
   Legend,
   Line,
   LineChart as Engine,
-  Tooltip,
   XAxis,
   YAxis,
   matchByDataKey,
@@ -12,7 +11,14 @@ import {
 import { Frame, animation, margin, useChartStyles } from './shared.js';
 import type { CartesianProps, Series } from './shared.js';
 
-import { ChartTooltip, type TooltipOptions } from './tooltip.js';
+import {
+  ActiveMarker,
+  LineTooltip,
+  hoverStyles,
+  type LineTooltipOptions,
+  type MarkerShape,
+  type MarkerAppearance,
+} from './lineHover.js';
 
 type LineSeries = Omit<Series, 'color'> & { color?: string; dash?: string };
 export interface LineChartProps extends Omit<CartesianProps, 'series'> {
@@ -20,12 +26,15 @@ export interface LineChartProps extends Omit<CartesianProps, 'series'> {
   strokeWidth?: number;
   curve?: 'linear' | 'monotone' | 'step';
   dots?: boolean;
+  dotShape?: MarkerShape;
+  activeDotAppearance?: MarkerAppearance;
+  activeDotDuration?: number;
   dotRadius?: number;
   activeRadius?: number;
   hollowDots?: boolean;
   connectNulls?: boolean;
-  tooltip?: TooltipOptions;
-  legendPosition?: 'top' | 'bottom';
+  tooltip?: LineTooltipOptions;
+  legendPosition?: 'top' | 'bottom' | 'left' | 'right';
   animationKey?: string;
 }
 
@@ -40,6 +49,9 @@ export function LineChart({
   strokeWidth = 3,
   curve = 'monotone',
   dots = false,
+  dotShape = 'circle',
+  activeDotAppearance = 'none',
+  activeDotDuration = 240,
   dotRadius = 3,
   activeRadius = 5,
   hollowDots = false,
@@ -67,12 +79,19 @@ export function LineChart({
         )}
         <XAxis {...styles.axis} dataKey={categoryKey} />
         <YAxis {...styles.axis} width={42} />
-        <Tooltip
-          isAnimationActive={lineMotion.isAnimationActive}
-          cursor={{ fill: 'none', strokeDasharray: '3 3' }}
-          content={(props) => <ChartTooltip {...props} options={tooltip} />}
+        <defs>
+          <style>{hoverStyles}</style>
+        </defs>
+        <LineTooltip
+          options={tooltip}
+          motionEnabled={motion?.enabled !== false}
         />
-        {legendPosition && <Legend verticalAlign={legendPosition} />}
+        {legendPosition &&
+          (legendPosition === 'left' || legendPosition === 'right' ? (
+            <Legend position={legendPosition} />
+          ) : (
+            <Legend verticalAlign={legendPosition} />
+          ))}
         {series.map((s) => (
           <Line
             key={s.key}
@@ -85,6 +104,7 @@ export function LineChart({
             dot={
               dots
                 ? {
+                    symbol: dotShape === 'circle' ? undefined : dotShape,
                     r: dotRadius,
                     strokeWidth: hollowDots ? 2 : 0,
                     strokeDasharray: 'none',
@@ -93,14 +113,27 @@ export function LineChart({
                 : false
             }
             activeDot={
-              activeRadius > 0
-                ? {
+              activeRadius <= 0
+                ? false
+                : motion?.enabled !== false && activeDotAppearance !== 'none'
+                ? (point) => (
+                    <ActiveMarker
+                      key={point.index}
+                      point={point}
+                      shape={dotShape}
+                      radius={activeRadius}
+                      outline={styles.surface}
+                      appearance={activeDotAppearance}
+                      duration={activeDotDuration}
+                    />
+                  )
+                : {
+                    symbol: dotShape === 'circle' ? undefined : dotShape,
                     r: activeRadius,
                     stroke: styles.surface,
                     strokeWidth: 2,
                     strokeDasharray: 'none',
                   }
-                : false
             }
             connectNulls={connectNulls}
             animationMatchBy={matchPoints}

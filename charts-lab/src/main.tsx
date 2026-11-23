@@ -257,7 +257,7 @@ function Lab() {
                 </button>
               ))}
             </div>
-            <div className="workspace">
+            <div className={kind === 'line' ? 'workspace workspace-line' : 'workspace'}>
               <div className="viewer">
                 <section className="panel plot">
                   <header>

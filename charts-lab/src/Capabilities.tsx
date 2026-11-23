@@ -23,14 +23,20 @@ const guides: Record<Kind, { intro: string; doc: string; rows: Capability[] }> =
         ],
         [
           'Обычная точка',
-          'dot.r · dot.fill · dot.strokeWidth · dot.strokeDasharray',
+          'dot.symbol · dot.r · dot.fill · dot.strokeDasharray',
           'Меняйте радиус и заполнение. У маркера сплошной контур: штрихи линии не разбивают окружность на фрагменты.',
           'lab',
         ],
         [
           'Активная точка',
-          'activeDot.r · activeDot.stroke',
+          'activeDot · activeDotAppearance · activeDotDuration',
           'Размер точки при наведении задаётся отдельно. При радиусе 0 активная точка скрыта, координата и карточка остаются видны.',
+          'lab',
+        ],
+        [
+          'Карточка и легенда',
+          'tooltip.position · tooltip.appearance · tooltip.smoothTracking · legendPosition',
+          'Перенесите карточку в угол или оставьте у курсора. У карточки есть мгновенный показ, проявление и сдвиг. Легенду можно разместить у любой из четырёх сторон или скрыть.',
           'lab',
         ],
         [

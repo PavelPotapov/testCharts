@@ -196,6 +196,12 @@ button:hover:not(:disabled) {
   align-items: start;
   margin-bottom: 48px;
 }
+@media (min-width: 801px) and (min-height: 600px) {
+  .workspace-line .viewer {
+    position: sticky;
+    top: 12px;
+  }
+}
 .viewer {
   min-width: 0;
   display: grid;

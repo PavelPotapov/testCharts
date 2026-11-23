@@ -22,6 +22,19 @@ export const defaults = {
   showPlan: true,
   dotRadius: 3,
   activeRadius: 5,
+  dotShape: 'circle' as NonNullable<LineChartProps['dotShape']>,
+  activeDotAppearance: 'grow' as NonNullable<
+    LineChartProps['activeDotAppearance']
+  >,
+  activeDotDuration: 250,
+  tooltipPosition: 'follow' as NonNullable<
+    NonNullable<LineChartProps['tooltip']>['position']
+  >,
+  tooltipAppearance: 'fade' as NonNullable<
+    NonNullable<LineChartProps['tooltip']>['appearance']
+  >,
+  tooltipDuration: 250,
+  tooltipSmooth: true,
   hollowDots: false,
   dash: '6 4',
   sweep: 300,
@@ -54,7 +67,9 @@ export const defaults = {
   theme: 'light' as ThemeName,
   lineOverride: false,
   lineColor: '',
-  legendPosition: 'bottom' as 'top' | 'bottom',
+  legendPosition: 'bottom' as
+    | NonNullable<LineChartProps['legendPosition']>
+    | 'hidden',
   tooltipKind: 'standard' as 'standard' | 'formatted' | 'comparison',
   lineMissing: false,
   connectNulls: false,
@@ -216,6 +231,9 @@ export const catalog = {
             : undefined,
         },
       ].filter((row) => (row.key === 'actual' ? s.showActual : s.showPlan)),
+      dotShape: s.dotShape,
+      activeDotAppearance: s.activeDotAppearance,
+      activeDotDuration: s.activeDotDuration,
       dotRadius: s.dotRadius,
       activeRadius: s.activeRadius,
       hollowDots: s.hollowDots,
@@ -223,15 +241,17 @@ export const catalog = {
       curve: s.curve,
       dots: s.dots,
       connectNulls: s.lineMissing && s.connectNulls,
-      legendPosition: s.legendPosition,
-      tooltip:
-        s.tooltipKind === 'standard'
-          ? undefined
-          : {
-              unit: 'млн ₽',
-              compare:
-                s.tooltipKind === 'comparison' ? ['actual', 'plan'] : undefined,
-            },
+      legendPosition:
+        s.legendPosition === 'hidden' ? undefined : s.legendPosition,
+      tooltip: {
+        position: s.tooltipPosition,
+        appearance: s.tooltipAppearance,
+        duration: s.tooltipDuration,
+        smoothTracking: s.tooltipSmooth,
+        unit: s.tooltipKind === 'standard' ? undefined : 'млн ₽',
+        compare:
+          s.tooltipKind === 'comparison' ? ['actual', 'plan'] : undefined,
+      },
       animationKey: 'id',
     })
   ),

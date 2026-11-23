@@ -119,6 +119,89 @@ export function Controls({ kind, settings: s, onChange }: Props) {
           Сбросить
         </button>
       </header>
+      {kind === 'line' && (
+        <>
+          <fieldset>
+            <legend>Точки и наведение</legend>
+            {select('dotShape', 'Форма точки', [
+              ['circle', 'Круг'],
+              ['diamond', 'Ромб'],
+              ['square', 'Квадрат'],
+              ['triangle', 'Треугольник'],
+            ])}
+            {select('activeDotAppearance', 'Появление точки', [
+              ['none', 'Мгновенно'],
+              ['grow', 'Увеличение'],
+              ['fade', 'Проявление'],
+              ['pulse', 'Пульс'],
+            ])}
+            {s.motion &&
+              s.activeRadius > 0 &&
+              s.activeDotAppearance !== 'none' &&
+              range(
+                'activeDotDuration',
+                'Длительность эффекта точки',
+                100,
+                1000,
+                ' мс',
+                50
+              )}
+            {range('activeRadius', 'Радиус при наведении', 0, 12, ' px')}
+            {toggle('dots', 'Маркеры точек')}
+            {s.dots && (
+              <>
+                {range('dotRadius', 'Радиус точки', 1, 8, ' px')}
+                {toggle('hollowDots', 'Полые точки')}
+              </>
+            )}
+          </fieldset>
+          <fieldset>
+            <legend>Легенда и подсказка</legend>
+            {select('legendPosition', 'Легенда', [
+              ['top', 'Сверху'],
+              ['bottom', 'Снизу'],
+              ['left', 'Слева'],
+              ['right', 'Справа'],
+              ['hidden', 'Скрыта'],
+            ])}
+            {select('tooltipPosition', 'Положение подсказки', [
+              ['follow', 'У курсора'],
+              ['top-left', 'Сверху слева'],
+              ['top-right', 'Сверху справа'],
+              ['bottom-left', 'Снизу слева'],
+              ['bottom-right', 'Снизу справа'],
+            ])}
+            {select('tooltipAppearance', 'Появление подсказки', [
+              ['none', 'Мгновенно'],
+              ['fade', 'Проявление'],
+              ['rise', 'Сдвиг снизу'],
+            ])}
+            {s.tooltipPosition === 'follow' &&
+              toggle('tooltipSmooth', 'Плавное движение за курсором')}
+            {s.motion &&
+              (s.tooltipAppearance !== 'none' ||
+                (s.tooltipPosition === 'follow' && s.tooltipSmooth)) &&
+              range(
+                'tooltipDuration',
+                'Длительность эффекта подсказки',
+                100,
+                1000,
+                ' мс',
+                50
+              )}
+            {select('tooltipKind', 'Содержимое подсказки', [
+              ['standard', 'Стандартная'],
+              ['formatted', 'С единицами'],
+              ['comparison', 'С отклонением'],
+            ])}
+            <p className="control-note">
+              Наведите на месяц или используйте стрелки ← и →, когда график в
+              фокусе. Для повторного появления подсказки выведите курсор за
+              график и верните его.
+            </p>
+          </fieldset>
+        </>
+      )}
       {hasSeries && (
         <fieldset>
           <legend>Видимые серии</legend>
@@ -230,24 +313,6 @@ export function Controls({ kind, settings: s, onChange }: Props) {
           <a href={tableSource}>Цвета таблицы</a>
         </p>
       </fieldset>
-      {kind === 'line' && (
-        <fieldset>
-          <legend>Легенда и подсказка</legend>
-          {select('legendPosition', 'Легенда', [
-            ['top', 'Сверху'],
-            ['bottom', 'Снизу'],
-          ])}
-          {select('tooltipKind', 'Подсказка', [
-            ['standard', 'Стандартная'],
-            ['formatted', 'С единицами'],
-            ['comparison', 'С отклонением'],
-          ])}
-          <p className="control-note">
-            Карточка показывает видимые серии. Клавиши ← и → перемещают
-            подсказку, когда график в фокусе.
-          </p>
-        </fieldset>
-      )}
       {['line', 'bar', 'pie'].includes(kind) && (
         <fieldset>
           <legend>Данные</legend>
@@ -289,14 +354,6 @@ export function Controls({ kind, settings: s, onChange }: Props) {
               ['2 4', 'Короткий'],
               ['', 'Сплошной'],
             ])}
-            {toggle('dots', 'Маркеры точек')}
-            {s.dots && (
-              <>
-                {range('dotRadius', 'Радиус точки', 1, 8, ' px')}
-                {toggle('hollowDots', 'Полые точки')}
-              </>
-            )}
-            {range('activeRadius', 'Радиус при наведении', 0, 12, ' px')}
           </>
         )}
         {kind === 'composed' &&

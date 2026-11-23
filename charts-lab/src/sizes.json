@@ -8,8 +8,8 @@
   },
   {
     "mode": "line",
-    "bytes": 588326,
-    "gzip": 173969,
+    "bytes": 590746,
+    "gzip": 174823,
     "wrappers": [
       "line"
     ],
@@ -146,8 +146,8 @@
   },
   {
     "mode": "all",
-    "bytes": 772950,
-    "gzip": 221005,
+    "bytes": 775376,
+    "gzip": 221776,
     "wrappers": [
       "line",
       "area",
