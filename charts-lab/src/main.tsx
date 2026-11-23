@@ -1,16 +1,21 @@
-import { Suspense, useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { catalog, defaults, kinds, type Kind, type Settings } from './catalog';
+const Capabilities = lazy(() =>
+  import('./Capabilities').then((m) => ({ default: m.Capabilities }))
+);
 import { Controls } from './Controls';
 import { tableStyle } from './palette';
 import sizes from './sizes.json';
+import styles from '@sddsjs/sdds_finai/css/sdds_finai_default.module.css';
 import './style.css';
 
-const research =
-  'https://github.com/PavelPotapov/testCharts/blob/main/charts-lab/RESEARCH.md';
 const kib = (n: number) =>
   (n / 1024).toLocaleString('ru-RU', { maximumFractionDigits: 1 });
 const typeLabel: Record<Kind, string> = {
+  composed: 'Комбинированная диаграмма',
+  radial: 'Радиальная диаграмма',
+  funnel: 'Воронка',
   line: 'Линейный график',
   area: 'График с областями',
   bar: 'Столбчатая диаграмма',
@@ -25,9 +30,9 @@ function Bundle() {
     <section className="panel reading">
       <h2>Стоимость импорта</h2>
       <p>
-        Девять независимых production-сборок Vite. Каждая включает React 18.3.1
-        и React DOM. Таблица показывает размер минифицированного JavaScript и
-        его размер после gzip.
+        Количество независимых production-сборок Vite — {sizes.length}. Каждая
+        включает React 18.3.1 и React DOM. Таблица показывает размер
+        минифицированного JavaScript и его размер после gzip. Общий CSS двух тем SDDS и интерфейса стенда загружается отдельным файлом.
       </p>
       <div className="scroll">
         <table>
@@ -47,7 +52,7 @@ function Bundle() {
                   {r.mode === 'react'
                     ? 'Только React'
                     : r.mode === 'all'
-                    ? 'Все семь'
+                    ? 'Все виды'
                     : typeLabel[r.mode as Kind]}
                 </th>
                 <td>{kib(r.bytes)}</td>
@@ -82,110 +87,6 @@ function Bundle() {
         <code>pnpm measure</code>. Размер по сети зависит от сборщика
         приложения, кеша и сжатия на сервере.
       </p>
-    </section>
-  );
-}
-const rows = [
-  [
-    'Линия и область',
-    'Кривая, разрывы, толщина, маркеры, прозрачность, накопление',
-    'type · strokeWidth · dot · connectNulls · stackId',
-    'Line',
-  ],
-  [
-    'Столбцы',
-    'Группировка и накопление, ширина, радиус углов, горизонтальные полосы',
-    'barSize · radius · stackId · layout',
-    'Bar',
-  ],
-  [
-    'Круг и кольцо',
-    'Сектора, положение центра, отверстие, углы и зазоры',
-    'innerRadius · cx · startAngle · paddingAngle',
-    'Pie',
-  ],
-  [
-    'Точки и пузыри',
-    'Две числовые оси, площадь и форма маркера, произвольный SVG',
-    'ZAxis · range · shape',
-    'Scatter',
-  ],
-  [
-    'Радар',
-    'Заливка профиля, контур, круглая или многоугольная сетка',
-    'fillOpacity · strokeWidth · PolarGrid',
-    'Radar',
-  ],
-  [
-    'Карта дерева',
-    'Пропорции прямоугольников, вложенность, свой рендер ячейки',
-    'aspectRatio · dataKey · content',
-    'Treemap',
-  ],
-  [
-    'Комбинированный',
-    'Линия поверх столбцов, несколько осей, общий tooltip',
-    'ComposedChart · yAxisId',
-    'ComposedChart',
-  ],
-  [
-    'Специальные',
-    'Радиальные столбцы, воронка, потоки, иерархия секторов',
-    'RadialBar · Funnel · Sankey · SunburstChart',
-    'RadialBar',
-  ],
-  [
-    'Тепловая карта',
-    'Нужен адаптер для матрицы X × Y, шкалы цвета и ячеек',
-    'Scatter с собственным shape или отдельный SVG',
-    'Scatter',
-  ],
-];
-function Research() {
-  return (
-    <section className="panel reading">
-      <h2>Карта возможностей</h2>
-      <p>
-        Recharts рассчитывает координаты и геометрию. Обёртка переводит токены
-        дизайн-системы, настройки серии и форматтеры в свойства компонентов.
-      </p>
-      <div className="scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>Вид</th>
-              <th>Возможности</th>
-              <th>API движка</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map(([label, info, api, doc]) => (
-              <tr key={label}>
-                <th>{label}</th>
-                <td>{info}</td>
-                <td>
-                  <a href={'https://recharts.github.io/en-US/api/' + doc + '/'}>
-                    {api}
-                  </a>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <h3>Что дать командам</h3>
-      <p>
-        Один типизированный вход на вид. В общем контракте — данные, доступное
-        название, высота и анимация. Для рядов — ключ категории, ключи серий и
-        роли цветов. Для долей, точек и деревьев нужны собственные схемы данных.
-        Тема отвечает за оси, сетку, типографику и палитру.
-      </p>
-      <p>
-        Расширения удобно вводить от простого к сложному: формат значения,
-        содержимое подсказки и легенды, затем собственная SVG-фигура. Контракт
-        слота может возвращать исходную строку и идентификатор серии.
-      </p>
-      <a href={research}>Полное исследование и проект API</a>
     </section>
   );
 }
@@ -255,6 +156,10 @@ function Lab() {
   const categoryData =
     kind === 'pie' && !s.pieEmpty
       ? catalog.pie.props(s).data
+      : kind === 'radial'
+      ? catalog.radial.props(s).data
+      : kind === 'funnel'
+      ? catalog.funnel.props(s).data
       : kind === 'treemap'
       ? catalog.treemap.props(s).data
       : [];
@@ -267,7 +172,7 @@ function Lab() {
           label: entry.name,
         }));
   return (
-    <div className="lab" style={tableStyle(s.theme)}>
+    <div className={`lab ${styles[s.theme]}`} style={tableStyle(s.theme)}>
       <header className="mast">
         <div className="wrap mastin">
           <div className="brand">
@@ -279,7 +184,25 @@ function Lab() {
             </span>
             Атлас графиков
           </div>
-          <a href="https://github.com/PavelPotapov/testCharts">GitHub</a>
+          <div className="mast-actions">
+            <label>
+              Тема{' '}
+              <select
+                aria-label="Тема таблицы и графика"
+                value={s.theme}
+                onChange={(e) =>
+                  set((previous) => ({
+                    ...previous,
+                    theme: e.target.value === 'dark' ? 'dark' : 'light',
+                  }))
+                }
+              >
+                <option value="light">Светлая</option>
+                <option value="dark">Тёмная</option>
+              </select>
+            </label>
+            <a href="https://github.com/PavelPotapov/testCharts">GitHub</a>
+          </div>
         </div>
       </header>
       <main className="wrap">
@@ -398,7 +321,17 @@ function Lab() {
             </div>
           </>
         ) : page === 'Возможности' ? (
-          <Research />
+          <Suspense
+            fallback={<p role="status">Загрузка карты возможностей…</p>}
+          >
+            <Capabilities
+              initial={kind}
+              openLab={(next) => {
+                setKind(next);
+                setPage('Лаборатория');
+              }}
+            />
+          </Suspense>
         ) : (
           <Bundle />
         )}

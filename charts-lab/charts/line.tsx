@@ -8,80 +8,25 @@ import {
   XAxis,
   YAxis,
   matchByDataKey,
-  useRechartsTheme,
-  type TooltipContentProps,
 } from 'recharts';
-import {
-  Frame,
-  animation,
-  margin,
-  tooltipStyle,
-  useChartStyles,
-} from './shared.js';
+import { Frame, animation, margin, useChartStyles } from './shared.js';
 import type { CartesianProps, Series } from './shared.js';
 
-type LineSeries = Omit<Series, 'color'> & { color?: string; dash?: string };
-type TooltipOptions = {
-  unit: string;
-  compare?: [actualKey: string, planKey: string];
-};
+import { ChartTooltip, type TooltipOptions } from './tooltip.js';
 
+type LineSeries = Omit<Series, 'color'> & { color?: string; dash?: string };
 export interface LineChartProps extends Omit<CartesianProps, 'series'> {
   series: LineSeries[];
   strokeWidth?: number;
   curve?: 'linear' | 'monotone' | 'step';
   dots?: boolean;
+  dotRadius?: number;
+  activeRadius?: number;
+  hollowDots?: boolean;
   connectNulls?: boolean;
   tooltip?: TooltipOptions;
   legendPosition?: 'top' | 'bottom';
   animationKey?: string;
-}
-
-const number = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 1 });
-const signed = new Intl.NumberFormat('ru-RU', {
-  maximumFractionDigits: 1,
-  signDisplay: 'exceptZero',
-});
-
-function ComparisonTooltip({
-  active,
-  accessibilityLayer,
-  label,
-  payload,
-  options,
-}: TooltipContentProps & { options: TooltipOptions }) {
-  const theme = useRechartsTheme();
-  if (!active || !payload.length || !options.compare) return null;
-
-  const [actualKey, planKey] = options.compare;
-  const actual = payload.find((item) => item.dataKey === actualKey);
-  const plan = payload.find((item) => item.dataKey === planKey);
-  const difference =
-    typeof actual?.value === 'number' && typeof plan?.value === 'number'
-      ? signed.format(actual.value - plan.value) + ' ' + options.unit
-      : 'нет данных';
-
-  return (
-    <div
-      role={accessibilityLayer ? 'status' : undefined}
-      aria-atomic={accessibilityLayer || undefined}
-      style={{
-        background: '#fff',
-        padding: '9px 11px',
-        ...tooltipStyle,
-        ...theme?.tooltip?.contentStyle,
-      }}
-    >
-      <strong>{label}</strong>
-      {payload.map(({ dataKey, name, value }) => (
-        <div key={String(dataKey)}>
-          {name} · {typeof value === 'number' ? number.format(value) : value}{' '}
-          {options.unit}
-        </div>
-      ))}
-      <div>Отклонение от плана · {difference}</div>
-    </div>
-  );
 }
 
 export function LineChart({
@@ -95,6 +40,9 @@ export function LineChart({
   strokeWidth = 3,
   curve = 'monotone',
   dots = false,
+  dotRadius = 3,
+  activeRadius = 5,
+  hollowDots = false,
   connectNulls = false,
   tooltip,
   legendPosition,
@@ -120,21 +68,9 @@ export function LineChart({
         <XAxis {...styles.axis} dataKey={categoryKey} />
         <YAxis {...styles.axis} width={42} />
         <Tooltip
-          {...styles.tooltip}
           isAnimationActive={lineMotion.isAnimationActive}
-          formatter={
-            tooltip && !tooltip.compare
-              ? (value) =>
-                  typeof value === 'number'
-                    ? number.format(value) + ' ' + tooltip.unit
-                    : value
-              : undefined
-          }
-          content={
-            tooltip?.compare
-              ? (props) => <ComparisonTooltip {...props} options={tooltip} />
-              : undefined
-          }
+          cursor={{ fill: 'none', strokeDasharray: '3 3' }}
+          content={(props) => <ChartTooltip {...props} options={tooltip} />}
         />
         {legendPosition && <Legend verticalAlign={legendPosition} />}
         {series.map((s) => (
@@ -146,7 +82,26 @@ export function LineChart({
             stroke={s.color}
             strokeWidth={strokeWidth}
             strokeDasharray={s.dash}
-            dot={dots ? { r: 3 } : false}
+            dot={
+              dots
+                ? {
+                    r: dotRadius,
+                    strokeWidth: hollowDots ? 2 : 0,
+                    strokeDasharray: 'none',
+                    ...(hollowDots ? { fill: styles.surface } : {}),
+                  }
+                : false
+            }
+            activeDot={
+              activeRadius > 0
+                ? {
+                    r: activeRadius,
+                    stroke: styles.surface,
+                    strokeWidth: 2,
+                    strokeDasharray: 'none',
+                  }
+                : false
+            }
             connectNulls={connectNulls}
             animationMatchBy={matchPoints}
             {...lineMotion}

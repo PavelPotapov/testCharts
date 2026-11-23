@@ -1,4 +1,5 @@
 import { Pie, PieChart as Engine, Tooltip } from 'recharts';
+import { ChartTooltip } from './tooltip.js';
 import { Frame, animation, useChartStyles } from './shared.js';
 import type { FrameProps } from './shared.js';
 export interface Slice {
@@ -56,7 +57,10 @@ export function PieChart({
           stroke="none"
           {...animation(motion)}
         />
-        <Tooltip {...styles.tooltip} />
+        <Tooltip
+          cursor={{ fill: 'none' }}
+          content={(props) => <ChartTooltip {...props} categoryKey="name" />}
+        />
       </Engine>
     </Frame>
   );

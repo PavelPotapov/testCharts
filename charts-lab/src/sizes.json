@@ -8,8 +8,8 @@
   },
   {
     "mode": "line",
-    "bytes": 586698,
-    "gzip": 173375,
+    "bytes": 588326,
+    "gzip": 173969,
     "wrappers": [
       "line"
     ],
@@ -22,8 +22,8 @@
   },
   {
     "mode": "area",
-    "bytes": 573904,
-    "gzip": 170193,
+    "bytes": 576379,
+    "gzip": 171265,
     "wrappers": [
       "area"
     ],
@@ -36,8 +36,8 @@
   },
   {
     "mode": "bar",
-    "bytes": 582826,
-    "gzip": 173058,
+    "bytes": 585317,
+    "gzip": 174076,
     "wrappers": [
       "bar"
     ],
@@ -50,8 +50,8 @@
   },
   {
     "mode": "pie",
-    "bytes": 522210,
-    "gzip": 158142,
+    "bytes": 524698,
+    "gzip": 159152,
     "wrappers": [
       "pie"
     ],
@@ -64,8 +64,8 @@
   },
   {
     "mode": "radar",
-    "bytes": 547699,
-    "gzip": 163204,
+    "bytes": 550172,
+    "gzip": 164263,
     "wrappers": [
       "radar"
     ],
@@ -78,8 +78,8 @@
   },
   {
     "mode": "scatter",
-    "bytes": 566495,
-    "gzip": 169233,
+    "bytes": 568980,
+    "gzip": 170233,
     "wrappers": [
       "scatter"
     ],
@@ -92,8 +92,8 @@
   },
   {
     "mode": "treemap",
-    "bytes": 510859,
-    "gzip": 156098,
+    "bytes": 513365,
+    "gzip": 157121,
     "wrappers": [
       "treemap"
     ],
@@ -103,9 +103,51 @@
     ]
   },
   {
+    "mode": "composed",
+    "bytes": 606076,
+    "gzip": 178976,
+    "wrappers": [
+      "composed"
+    ],
+    "engines": [
+      "CartesianChart",
+      "CategoricalChart",
+      "ComposedChart",
+      "RechartsWrapper"
+    ]
+  },
+  {
+    "mode": "radial",
+    "bytes": 544716,
+    "gzip": 163926,
+    "wrappers": [
+      "radial"
+    ],
+    "engines": [
+      "CategoricalChart",
+      "PolarChart",
+      "RadialBarChart",
+      "RechartsWrapper"
+    ]
+  },
+  {
+    "mode": "funnel",
+    "bytes": 528579,
+    "gzip": 159253,
+    "wrappers": [
+      "funnel"
+    ],
+    "engines": [
+      "CartesianChart",
+      "CategoricalChart",
+      "FunnelChart",
+      "RechartsWrapper"
+    ]
+  },
+  {
     "mode": "all",
-    "bytes": 733541,
-    "gzip": 211339,
+    "bytes": 772950,
+    "gzip": 221005,
     "wrappers": [
       "line",
       "area",
@@ -113,17 +155,23 @@
       "pie",
       "radar",
       "scatter",
-      "treemap"
+      "treemap",
+      "composed",
+      "radial",
+      "funnel"
     ],
     "engines": [
       "AreaChart",
       "BarChart",
       "CartesianChart",
       "CategoricalChart",
+      "ComposedChart",
+      "FunnelChart",
       "LineChart",
       "PieChart",
       "PolarChart",
       "RadarChart",
+      "RadialBarChart",
       "RechartsWrapper",
       "ScatterChart",
       "Treemap"

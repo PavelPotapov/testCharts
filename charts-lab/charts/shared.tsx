@@ -73,12 +73,6 @@ export const axis = {
 };
 export const gridColor = `var(--chart-grid, ${tableTokens.light.borderColor})`;
 export const margin = { top: 18, right: 18, bottom: 6, left: 2 };
-export const tooltipStyle = {
-  borderRadius: 8,
-  border: `1px solid ${tableTokens.light.borderColor}`,
-  color: tableTokens.light.textDark,
-  fontSize: 14,
-};
 
 const themedAxis = { ...axis, tick: { fontSize: 12 } };
 
@@ -86,7 +80,7 @@ type ChartStyles = {
   axis: typeof axis | typeof themedAxis;
   gridStroke: string | undefined;
   referenceStroke: string;
-  tooltip: { itemStyle?: CSSProperties; contentStyle?: CSSProperties };
+  bandFill: string;
   surface: CSSProperties['backgroundColor'];
   text: CSSProperties['color'];
 };
@@ -98,9 +92,10 @@ export function useChartStyles(chartTheme?: RechartsTheme): ChartStyles {
     axis: theme ? themedAxis : axis,
     gridStroke: theme ? undefined : gridColor,
     referenceStroke: theme?.reference?.stroke ?? dataTokens.light['data-gray'],
-    tooltip: theme
-      ? { itemStyle: theme.typography }
-      : { contentStyle: tooltipStyle },
+    bandFill:
+      typeof theme?.cursor?.fill === 'string' && theme.cursor.fill !== 'none'
+        ? theme.cursor.fill
+        : tableTokens.light.bgHeader,
     surface: theme?.chart?.backgroundColor ?? tableTokens.light.bgCell,
     text: theme?.typography?.color,
   };

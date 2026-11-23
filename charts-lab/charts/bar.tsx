@@ -8,6 +8,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { ChartTooltip } from './tooltip.js';
 import { Frame, animation, margin, useChartStyles } from './shared.js';
 import type { CartesianProps } from './shared.js';
 
@@ -84,7 +85,10 @@ export function BarChart({
             stroke={styles.referenceStroke}
           />
         )}
-        <Tooltip {...styles.tooltip} />
+        <Tooltip
+          cursor={{ fill: styles.bandFill, stroke: 'none' }}
+          content={(props) => <ChartTooltip {...props} />}
+        />
         {stacked ? <BarStack radius={radius}>{bars}</BarStack> : bars}
       </Engine>
     </Frame>

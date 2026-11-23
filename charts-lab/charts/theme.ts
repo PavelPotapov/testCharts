@@ -50,40 +50,54 @@ export const tableTokens = {
   },
 };
 
-export function chartColors(theme: ThemeName) {
-  const tokens = dataTokens[theme];
+export function dataPaint(
+  theme: ThemeName,
+  key: keyof typeof dataTokens.light
+) {
+  return `var(--${key}, ${dataTokens[theme][key]})`;
+}
+
+export function chartColors(theme: ThemeName, cssVariables = false) {
+  const color = (key: keyof typeof dataTokens.light) =>
+    cssVariables ? dataPaint(theme, key) : dataTokens[theme][key];
   const planLineToken =
     theme === 'light' ? 'inverse-data-yellow' : 'data-yellow';
   return {
-    actual: tokens['data-blue'],
-    plan: tokens['data-yellow'],
-    planStroke: tokens[planLineToken],
+    actual: color('data-blue'),
+    plan: color('data-yellow'),
+    planStroke: color(planLineToken),
     planLineToken,
-    custom: tokens[theme === 'light' ? 'inverse-data-orchid' : 'data-orchid'],
+    custom: color(theme === 'light' ? 'inverse-data-orchid' : 'data-orchid'),
   };
 }
 
 function createTheme(name: ThemeName): RechartsTheme {
   const ui = tableTokens[name];
-  const colors = chartColors(name);
+  const colors = chartColors(name, true);
   return {
     graphicalItems: [
       { stroke: colors.actual, fill: colors.actual },
       { stroke: colors.planStroke, fill: colors.plan },
     ],
-    chart: { backgroundColor: ui.bgCell, borderRadius: 8 },
-    typography: { color: ui.textDark },
-    axis: { stroke: ui.textDark },
-    grid: { stroke: dataTokens[name]['data-gray'] },
-    cursor: { stroke: ui.textDark },
-    reference: { stroke: dataTokens[name]['data-gray'] },
-    legend: { labelStyle: { color: ui.textDark } },
+    chart: {
+      backgroundColor: `var(--surface-solid-card, ${ui.bgCell})`,
+      borderRadius: 8,
+    },
+    typography: { color: `var(--text-primary, ${ui.textDark})` },
+    axis: { stroke: `var(--text-primary, ${ui.textDark})` },
+    grid: { stroke: dataPaint(name, 'data-gray') },
+    cursor: {
+      stroke: `var(--outline-accent, ${ui.accentColor})`,
+      fill: `var(--surface-accent-minor, ${ui.bgHeader})`,
+    },
+    reference: { stroke: dataPaint(name, 'data-gray') },
+    legend: { labelStyle: { color: `var(--text-primary, ${ui.textDark})` } },
     tooltip: {
       contentStyle: {
-        background: ui.bgCell,
-        border: '1px solid ' + ui.borderColor,
-        borderRadius: 8,
-        color: ui.textDark,
+        background: `var(--on-dark-surface-accent-minor, ${tableTokens.dark.bgHeader})`,
+        border: '1px solid ' + dataTokens.dark['data-gray'],
+        borderRadius: 10,
+        color: `var(--on-dark-text-primary, ${tableTokens.dark.textDark})`,
         fontSize: 14,
       },
     },

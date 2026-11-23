@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 import {
-  dataTokens,
+  dataPaint,
   tableTokens,
   type ThemeName,
 } from '@chart-lab/charts/theme';
@@ -27,10 +27,10 @@ const outlines = {
 
 export function channelPalette(theme: ThemeName, name: Channel) {
   const token = channelTokens[name];
-  const colors = dataTokens[theme];
+
   return {
-    color: colors[token],
-    strokeColor: colors[theme === 'light' ? outlines[token] : token],
+    color: dataPaint(theme, token),
+    strokeColor: dataPaint(theme, theme === 'light' ? outlines[token] : token),
   };
 }
 
@@ -38,12 +38,12 @@ export function tableStyle(name: ThemeName): CSSProperties {
   const ui = tableTokens[name];
   const colors = {
     '--page': ui.bgRowHovered,
-    '--surface': ui.bgCell,
-    '--header': ui.bgHeader,
-    '--editable': ui.bgEditableCell,
-    '--ink': ui.textDark,
-    '--accent': ui.accentColor,
-    '--border': ui.borderColor,
+    '--surface': `var(--surface-solid-card, ${ui.bgCell})`,
+    '--header': `var(--surface-accent-minor, ${ui.bgHeader})`,
+    '--editable': `var(--data-yellow-light, ${ui.bgEditableCell})`,
+    '--ink': `var(--text-primary, ${ui.textDark})`,
+    '--accent': `var(--outline-accent, ${ui.accentColor})`,
+    '--border': `var(--outline-solid-primary, ${ui.borderColor})`,
     '--code-background': tableTokens.dark.bgHeader,
     '--code-text': tableTokens.dark.textDark,
   };

@@ -6,6 +6,7 @@ import {
   PolarRadiusAxis,
   Tooltip,
 } from 'recharts';
+import { ChartTooltip } from './tooltip.js';
 import { Frame, animation, useChartStyles } from './shared.js';
 import type { CartesianProps } from './shared.js';
 export interface RadarChartProps extends CartesianProps {
@@ -45,7 +46,10 @@ export function RadarChart({
             {...animation(motion)}
           />
         ))}
-        <Tooltip {...styles.tooltip} />
+        <Tooltip
+          cursor={{ fill: 'none' }}
+          content={(props) => <ChartTooltip {...props} />}
+        />
       </Engine>
     </Frame>
   );

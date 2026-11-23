@@ -67,6 +67,25 @@ button {
   font-weight: 650;
   letter-spacing: -0.025em;
 }
+.mast-actions,
+.mast-actions label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+.mast-actions {
+  gap: 18px;
+}
+.mast-actions select {
+  max-width: none;
+}
+@media (max-width: 450px) {
+  .mast-actions,
+  .mast-actions label {
+    gap: 4px;
+  }
+}
 .mast a {
   font-size: 0.9rem;
 }
@@ -237,6 +256,35 @@ button:hover:not(:disabled) {
 .controls {
   padding: 18px 20px;
 }
+.series-filters {
+  clear: both;
+  display: flex;
+  gap: 8px;
+}
+.series-filters label {
+  justify-content: flex-start;
+  gap: 7px;
+  padding: 3px 10px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  cursor: pointer;
+}
+.series-filters label:has(:checked) {
+  background: var(--header);
+}
+.series-filters i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.token-reference {
+  clear: both;
+  font-size: 0.87rem;
+  padding: 7px 0;
+}
+.token-reference summary {
+  cursor: pointer;
+}
 .controls h2 {
   font-size: 1.2rem;
   letter-spacing: -0.03em;
@@ -393,6 +441,55 @@ pre {
 .reading {
   padding: clamp(18px, 3vw, 36px);
   margin: 22px 0 46px;
+}
+@media (max-width: 680px) {
+  .reading .capability-table table {
+    min-width: 0;
+  }
+  .capability-table table,
+  .capability-table tbody,
+  .capability-table tr,
+  .capability-table td,
+  .capability-table th {
+    display: block;
+  }
+  .capability-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .capability-table td,
+  .capability-table th {
+    padding: 3px 0;
+    border: 0;
+  }
+  .capability-table tbody tr {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .capability-table td:last-child {
+    font-size: 0.8rem;
+  }
+}
+.guide-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 16px 0 24px;
+}
+.guide-detail {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.guide-detail summary {
+  font-weight: 600;
+  cursor: pointer;
+}
+.reading td code {
+  overflow-wrap: anywhere;
 }
 .reading h2 {
   font-size: 1.85rem;

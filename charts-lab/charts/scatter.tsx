@@ -7,6 +7,7 @@ import {
   CartesianGrid,
   Tooltip,
 } from 'recharts';
+import { ChartTooltip } from './tooltip.js';
 import { Frame, animation, margin, useChartStyles } from './shared.js';
 import type { FrameProps } from './shared.js';
 export interface Point {
@@ -50,7 +51,10 @@ export function ScatterChart({
           shape={shape}
           {...animation(motion)}
         />
-        <Tooltip {...styles.tooltip} />
+        <Tooltip
+          cursor={{ fill: 'none' }}
+          content={(props) => <ChartTooltip {...props} fallbackColor={color} />}
+        />
       </Engine>
     </Frame>
   );

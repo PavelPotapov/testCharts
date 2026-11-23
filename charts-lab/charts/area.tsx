@@ -6,6 +6,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { ChartTooltip } from './tooltip.js';
 import { Frame, animation, margin, useChartStyles } from './shared.js';
 import type { CartesianProps } from './shared.js';
 
@@ -42,7 +43,10 @@ export function AreaChart({
         )}
         <XAxis {...styles.axis} dataKey={categoryKey} />
         <YAxis {...styles.axis} width={42} />
-        <Tooltip {...styles.tooltip} />
+        <Tooltip
+          cursor={{ fill: 'none' }}
+          content={(props) => <ChartTooltip {...props} />}
+        />
         {series.map((s) => (
           <Area
             key={s.key}

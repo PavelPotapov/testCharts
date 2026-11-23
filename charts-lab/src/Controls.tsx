@@ -1,4 +1,4 @@
-import { defaults, type Kind, type Settings } from './catalog';
+import { defaults, stages, type Kind, type Settings } from './catalog';
 import { chartColors, dataTokens } from '@chart-lab/charts/theme';
 import { channelTokens, sddsSource, tableSource } from './palette';
 
@@ -90,11 +90,13 @@ export function Controls({ kind, settings: s, onChange }: Props) {
     </label>
   );
   const colors = chartColors(s.theme);
-  const categories = kind === 'pie' || kind === 'treemap';
+  const categories = ['pie', 'treemap', 'radial', 'funnel'].includes(kind);
+  const hasSeries = ['line', 'area', 'bar', 'radar', 'composed'].includes(kind);
+  const categoryNames = kind === 'funnel' ? stages : Object.keys(channelTokens);
   const emptyPie = kind === 'pie' && s.pieEmpty;
   type Token = keyof typeof dataTokens.light;
   const tokens: [string, Token][] = categories
-    ? Object.entries(channelTokens)
+    ? Object.values(channelTokens).map((token, i) => [categoryNames[i], token])
     : [
         [kind === 'scatter' ? 'Точки' : 'Факт', 'data-blue'],
         ...(kind === 'scatter'
@@ -110,47 +112,89 @@ export function Controls({ kind, settings: s, onChange }: Props) {
     <aside className="panel controls">
       <header>
         <h2>Параметры</h2>
-        <button className="text" onClick={() => onChange({ ...defaults })}>
+        <button
+          className="text"
+          onClick={() => onChange({ ...defaults, theme: s.theme })}
+        >
           Сбросить
         </button>
       </header>
-      <fieldset>
-        <legend>Палитра SDDS</legend>
-        {select('theme', 'Тема таблицы и графика', [
-          ['light', 'Светлая'],
-          ['dark', 'Тёмная'],
-        ])}
-        {!emptyPie && (
-          <dl className="palette-tokens">
-            {tokens.map(([label, token]) => {
-              const override =
-                kind === 'line'
-                  ? label === 'Факт' &&
-                    s.lineOverride &&
-                    (s.lineColor || colors.custom)
-                  : label === 'Факт' || label === 'Поиск' || label === 'Точки'
-                  ? s.color
-                  : label === 'План' || label === 'Партнёры'
-                  ? s.secondary
-                  : undefined;
-              const value = (
-                override || dataTokens[s.theme][token]
-              ).toUpperCase();
+      {hasSeries && (
+        <fieldset>
+          <legend>Видимые серии</legend>
+          <div className="series-filters">
+            {(['actual', 'plan'] as const).map((key) => {
+              const actual = key === 'actual';
+              const checked = actual ? s.showActual : s.showPlan;
+              const other = actual ? s.showPlan : s.showActual;
+              const swatch = actual
+                ? kind === 'line'
+                  ? s.lineOverride
+                    ? s.lineColor || colors.custom
+                    : colors.actual
+                  : s.color || colors.actual
+                : kind === 'line'
+                ? colors.planStroke
+                : s.secondary || colors.plan;
               return (
-                <div key={token}>
-                  <dt>
-                    <i style={{ backgroundColor: value }} aria-hidden="true" />
-                    {label}
-                  </dt>
-                  <dd>
-                    <code>
-                      {override ? 'Свой цвет' : token} {value}
-                    </code>
-                  </dd>
-                </div>
+                <label key={key}>
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    disabled={checked && !other}
+                    onChange={(e) =>
+                      set(actual ? 'showActual' : 'showPlan', e.target.checked)
+                    }
+                  />
+                  <i style={{ background: swatch }} aria-hidden="true" />
+                  {actual ? 'Факт' : 'План'}
+                </label>
               );
             })}
-          </dl>
+          </div>
+        </fieldset>
+      )}
+      <fieldset>
+        <legend>Палитра SDDS</legend>
+        {!emptyPie && (
+          <details className="token-reference">
+            <summary>Токены и цвета</summary>
+            <dl className="palette-tokens">
+              {tokens.map(([label, token]) => {
+                const override =
+                  kind === 'line'
+                    ? label === 'Факт' &&
+                      s.lineOverride &&
+                      (s.lineColor || colors.custom)
+                    : label === 'Факт' ||
+                      label === categoryNames[0] ||
+                      label === 'Точки'
+                    ? s.color
+                    : label === 'План' || label === categoryNames[1]
+                    ? s.secondary
+                    : undefined;
+                const value = (
+                  override || dataTokens[s.theme][token]
+                ).toUpperCase();
+                return (
+                  <div key={token}>
+                    <dt>
+                      <i
+                        style={{ backgroundColor: value }}
+                        aria-hidden="true"
+                      />
+                      {label}
+                    </dt>
+                    <dd>
+                      <code>
+                        {override ? 'Свой цвет' : token} {value}
+                      </code>
+                    </dd>
+                  </div>
+                );
+              })}
+            </dl>
+          </details>
         )}
         {kind === 'line' && (
           <>
@@ -167,7 +211,7 @@ export function Controls({ kind, settings: s, onChange }: Props) {
             {color(
               'color',
               categories
-                ? 'Цвет «Поиск»'
+                ? 'Цвет «' + categoryNames[0] + '»'
                 : kind === 'scatter'
                 ? 'Цвет серии'
                 : 'Цвет «Факт»',
@@ -176,7 +220,7 @@ export function Controls({ kind, settings: s, onChange }: Props) {
             {kind !== 'scatter' &&
               color(
                 'secondary',
-                categories ? 'Цвет «Партнёры»' : 'Цвет «План»',
+                categories ? 'Цвет «' + categoryNames[1] + '»' : 'Цвет «План»',
                 colors.plan
               )}
           </>
@@ -199,8 +243,8 @@ export function Controls({ kind, settings: s, onChange }: Props) {
             ['comparison', 'С отклонением'],
           ])}
           <p className="control-note">
-            Положение задаёт <code>verticalAlign</code>. <code>formatter</code>{' '}
-            добавляет единицы, <code>content</code> выводит отклонение от плана.
+            Карточка показывает видимые серии. Клавиши ← и → перемещают
+            подсказку, когда график в фокусе.
           </p>
         </fieldset>
       )}
@@ -224,7 +268,7 @@ export function Controls({ kind, settings: s, onChange }: Props) {
       )}
       <fieldset>
         <legend>Геометрия</legend>
-        {['line', 'area', 'radar', 'treemap'].includes(kind) &&
+        {['line', 'area', 'radar', 'treemap', 'composed'].includes(kind) &&
           range(
             'width',
             kind === 'treemap' ? 'Граница ячейки' : 'Толщина линии',
@@ -238,7 +282,42 @@ export function Controls({ kind, settings: s, onChange }: Props) {
             ['linear', 'Ломаная'],
             ['step', 'Ступени'],
           ])}
-        {kind === 'line' && toggle('dots', 'Маркеры точек')}
+        {kind === 'line' && (
+          <>
+            {select('dash', 'Штрих «План»', [
+              ['6 4', 'Пунктир'],
+              ['2 4', 'Короткий'],
+              ['', 'Сплошной'],
+            ])}
+            {toggle('dots', 'Маркеры точек')}
+            {s.dots && (
+              <>
+                {range('dotRadius', 'Радиус точки', 1, 8, ' px')}
+                {toggle('hollowDots', 'Полые точки')}
+              </>
+            )}
+            {range('activeRadius', 'Радиус при наведении', 0, 12, ' px')}
+          </>
+        )}
+        {kind === 'composed' &&
+          range('barSize', 'Ширина столбца', 4, 32, ' px')}
+        {kind === 'radial' && (
+          <>
+            {range('sweep', 'Размах дуги', 90, 360, '°', 15)}
+            {range('barSize', 'Толщина полосы', 4, 24, ' px')}
+            {toggle('track', 'Дорожка цели')}
+          </>
+        )}
+        {kind === 'funnel' && (
+          <>
+            {toggle('funnelLabels', 'Подписи этапов')}
+            {toggle('reversed', 'Развернуть воронку')}
+            {select('tip', 'Последний этап', [
+              ['rectangle', 'Прямоугольник'],
+              ['triangle', 'Треугольник'],
+            ])}
+          </>
+        )}
         {['area', 'radar'].includes(kind) &&
           range('opacity', 'Плотность заливки', 0, 1, '', 0.05)}
         {['bar', 'area'].includes(kind) && toggle('stacked', 'Накопление')}
@@ -274,7 +353,8 @@ export function Controls({ kind, settings: s, onChange }: Props) {
         {kind === 'treemap' &&
           range('ratio', 'Пропорция ячеек', 0.5, 4, '', 0.1)}
         {range('height', 'Высота графика', 220, 440, ' px', 10)}
-        {!['treemap', 'pie'].includes(kind) && toggle('grid', 'Сетка')}
+        {!['treemap', 'pie', 'radial', 'funnel'].includes(kind) &&
+          toggle('grid', 'Сетка')}
       </fieldset>
       {!emptyPie && (
         <fieldset>

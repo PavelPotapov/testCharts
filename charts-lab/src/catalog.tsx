@@ -13,7 +13,22 @@ import type { RadarChartProps } from '@chart-lab/charts/radar';
 import type { ScatterChartProps } from '@chart-lab/charts/scatter';
 import type { TreemapChartProps } from '@chart-lab/charts/treemap';
 
+import type { ComposedChartProps } from '@chart-lab/charts/composed';
+import type { RadialChartProps } from '@chart-lab/charts/radial';
+import type { FunnelChartProps } from '@chart-lab/charts/funnel';
+
 export const defaults = {
+  showActual: true,
+  showPlan: true,
+  dotRadius: 3,
+  activeRadius: 5,
+  hollowDots: false,
+  dash: '6 4',
+  sweep: 300,
+  track: true,
+  reversed: false,
+  funnelLabels: true,
+  tip: 'rectangle' as 'rectangle' | 'triangle',
   color: '',
   secondary: '',
   width: 3,
@@ -91,6 +106,7 @@ const mixedBars = monthly.map((row, index) => ({
   plan: [30, 32, -39, 36, -27, 13, 46, 60, 64, -21, 0, 74][index],
 }));
 const segments: Channel[] = ['Поиск', 'Партнёры', 'Рассылки', 'Прямые'];
+export const stages = ['Визиты', 'Заявки', 'Проверки', 'Сделки'];
 const total = [42, 27, 18, 13];
 const radar = [
   'Охват',
@@ -116,7 +132,7 @@ const motion = (s: Settings) => ({
   easing: s.easing,
 });
 const series = (s: Settings) => {
-  const colors = chartColors(s.theme);
+  const colors = chartColors(s.theme, true);
   return [
     { key: 'actual', label: 'Факт', color: s.color || colors.actual },
     {
@@ -125,7 +141,7 @@ const series = (s: Settings) => {
       color: s.secondary || colors.plan,
       strokeColor: s.secondary ? undefined : colors.planStroke,
     },
-  ];
+  ].filter((row) => (row.key === 'actual' ? s.showActual : s.showPlan));
 };
 const channelColor = (s: Settings, name: Channel) => {
   const override =
@@ -186,11 +202,23 @@ export const catalog = {
           key: 'actual',
           label: 'Факт',
           color: s.lineOverride
-            ? s.lineColor || chartColors(s.theme).custom
+            ? s.lineColor || chartColors(s.theme, true).custom
+            : !s.showPlan
+            ? chartColors(s.theme, true).actual
             : undefined,
         },
-        { key: 'plan', label: 'План', dash: '6 4' },
-      ],
+        {
+          key: 'plan',
+          label: 'План',
+          dash: s.dash || undefined,
+          color: !s.showActual
+            ? chartColors(s.theme, true).planStroke
+            : undefined,
+        },
+      ].filter((row) => (row.key === 'actual' ? s.showActual : s.showPlan)),
+      dotRadius: s.dotRadius,
+      activeRadius: s.activeRadius,
+      hollowDots: s.hollowDots,
       strokeWidth: s.width,
       curve: s.curve,
       dots: s.dots,
@@ -280,7 +308,7 @@ export const catalog = {
     (s) => ({
       ...base(s, 'Сравнение каналов'),
       data: points,
-      color: s.color || chartColors(s.theme).actual,
+      color: s.color || chartColors(s.theme, true).actual,
       grid: s.grid,
       maxArea: s.maxArea,
       shape: s.shape,
@@ -298,9 +326,61 @@ export const catalog = {
         ...tile,
         color: channelColor(s, tile.name).color,
       })),
-      color: s.color || chartColors(s.theme).actual,
+      color: s.color || chartColors(s.theme, true).actual,
       ratio: s.ratio,
       strokeWidth: s.width,
+    })
+  ),
+  composed: example<ComposedChartProps>(
+    'ComposedChart',
+    'Линия и столбцы',
+    'Факт и план · млн ₽',
+    'ComposedChart',
+    async () => (await import('@chart-lab/charts/composed')).ComposedChart,
+    (s) => ({
+      ...cart(s),
+      series: series(s).map((row) => ({
+        ...row,
+        kind: row.key === 'actual' ? 'bar' : 'line',
+      })),
+      barSize: s.barSize,
+      strokeWidth: s.width,
+    })
+  ),
+  radial: example<RadialChartProps>(
+    'RadialChart',
+    'Радиальные полосы',
+    'Выполнение цели по каналам · %',
+    'RadialBar',
+    async () => (await import('@chart-lab/charts/radial')).RadialChart,
+    (s) => ({
+      ...base(s, 'Выполнение цели'),
+      data: segments.map((name, i) => ({
+        name,
+        value: [82, 68, 54, 39][i],
+        color: channelColor(s, name).color,
+      })),
+      sweep: s.sweep,
+      thickness: s.barSize,
+      track: s.track,
+    })
+  ),
+  funnel: example<FunnelChartProps>(
+    'FunnelChart',
+    'Воронка',
+    'Переходы между этапами · количество',
+    'Funnel',
+    async () => (await import('@chart-lab/charts/funnel')).FunnelChart,
+    (s) => ({
+      ...base(s, 'Путь до сделки'),
+      data: segments.map((key, i) => ({
+        name: stages[i],
+        value: [1200, 860, 540, 280][i],
+        color: channelColor(s, key).color,
+      })),
+      reversed: s.reversed,
+      labels: s.funnelLabels,
+      lastShape: s.tip,
     })
   ),
 };

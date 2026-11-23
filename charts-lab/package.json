@@ -37,6 +37,18 @@
     "./theme": {
       "types": "./lib/theme.d.ts",
       "import": "./lib/theme.js"
+    },
+    "./composed": {
+      "types": "./lib/composed.d.ts",
+      "import": "./lib/composed.js"
+    },
+    "./radial": {
+      "types": "./lib/radial.d.ts",
+      "import": "./lib/radial.js"
+    },
+    "./funnel": {
+      "types": "./lib/funnel.d.ts",
+      "import": "./lib/funnel.js"
     }
   },
   "scripts": {
@@ -46,18 +58,19 @@
     "measure": "pnpm run build:lib && node scripts/measure.mjs"
   },
   "dependencies": {
-    "recharts": "3.11.0",
-    "react-is": "18.3.1"
+    "react-is": "18.3.1",
+    "recharts": "3.11.0"
   },
   "peerDependencies": {
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
+    "@sddsjs/sdds_finai": "0.2.1",
     "@types/react": "18.3.27",
     "@types/react-dom": "18.3.7",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "typescript": "5.9.3",
     "vite": "6.4.1"
   }
