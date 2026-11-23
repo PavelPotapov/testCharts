@@ -1,6 +1,6 @@
-import { defaults, stages, type Kind, type Settings } from './catalog';
-import { chartColors, dataTokens } from '@chart-lab/charts/theme';
-import { channelTokens, sddsSource, tableSource } from './palette';
+import { defaults, type Kind, type Settings } from './catalog';
+import { chartPalette, identifyPaint, type ColorSetting } from './chartPalette';
+import { sddsSource, tableSource } from './palette';
 
 type Props = {
   kind: Kind;
@@ -71,43 +71,36 @@ export function Controls({ kind, settings: s, onChange }: Props) {
       </select>
     </div>
   );
-  const color = (
-    key: 'color' | 'secondary' | 'lineColor',
-    label: string,
-    fallback: string
-  ) => (
-    <label className="color">
-      {label}
-      <span>
-        <input
-          type="color"
-          aria-label={label}
-          value={(s[key] || fallback).toLowerCase()}
-          onChange={(e) => set(key, e.target.value)}
-        />
-        <code>{(s[key] || fallback).toUpperCase()}</code>
-      </span>
-    </label>
-  );
-  const colors = chartColors(s.theme);
-  const categories = ['pie', 'treemap', 'radial', 'funnel'].includes(kind);
+  const palette = chartPalette(kind, s);
   const hasSeries = ['line', 'area', 'bar', 'radar', 'composed'].includes(kind);
-  const categoryNames = kind === 'funnel' ? stages : Object.keys(channelTokens);
   const emptyPie = kind === 'pie' && s.pieEmpty;
-  type Token = keyof typeof dataTokens.light;
-  const tokens: [string, Token][] = categories
-    ? Object.values(channelTokens).map((token, i) => [categoryNames[i], token])
-    : [
-        [kind === 'scatter' ? 'Точки' : 'Факт', 'data-blue'],
-        ...(kind === 'scatter'
-          ? []
-          : [
-              [
-                'План',
-                kind === 'line' ? colors.planLineToken : 'data-yellow',
-              ] as [string, Token],
-            ]),
-      ];
+  const paintRow = (paint: string, label: string, edit?: ColorSetting) => {
+    const { token, hex } = identifyPaint(paint, s.theme);
+    return (
+      <div className="paint-row">
+        {edit ? (
+          <input
+            type="color"
+            aria-label={'Цвет «' + label + '»'}
+            value={hex}
+            onChange={(e) => set(edit, e.target.value)}
+          />
+        ) : (
+          <i
+            className="paint-chip"
+            aria-hidden="true"
+            style={{ background: paint }}
+          />
+        )}
+        {token ? (
+          <code className="paint-token">--{token}</code>
+        ) : (
+          <span className="paint-token">Вручную</span>
+        )}
+        <code className="paint-hex">{hex}</code>
+      </div>
+    );
+  };
   return (
     <aside className="panel controls">
       <header>
@@ -210,15 +203,7 @@ export function Controls({ kind, settings: s, onChange }: Props) {
               const actual = key === 'actual';
               const checked = actual ? s.showActual : s.showPlan;
               const other = actual ? s.showPlan : s.showActual;
-              const swatch = actual
-                ? kind === 'line'
-                  ? s.lineOverride
-                    ? s.lineColor || colors.custom
-                    : colors.actual
-                  : s.color || colors.actual
-                : kind === 'line'
-                ? colors.planStroke
-                : s.secondary || colors.plan;
+              const swatch = palette[actual ? 0 : 1].paint;
               return (
                 <label key={key}>
                   <input
@@ -239,75 +224,21 @@ export function Controls({ kind, settings: s, onChange }: Props) {
       )}
       <fieldset>
         <legend>Палитра SDDS</legend>
-        {!emptyPie && (
-          <details className="token-reference">
-            <summary>Токены и цвета</summary>
-            <dl className="palette-tokens">
-              {tokens.map(([label, token]) => {
-                const override =
-                  kind === 'line'
-                    ? label === 'Факт' &&
-                      s.lineOverride &&
-                      (s.lineColor || colors.custom)
-                    : label === 'Факт' ||
-                      label === categoryNames[0] ||
-                      label === 'Точки'
-                    ? s.color
-                    : label === 'План' || label === categoryNames[1]
-                    ? s.secondary
-                    : undefined;
-                const value = (
-                  override || dataTokens[s.theme][token]
-                ).toUpperCase();
-                return (
-                  <div key={token}>
-                    <dt>
-                      <i
-                        style={{ backgroundColor: value }}
-                        aria-hidden="true"
-                      />
-                      {label}
-                    </dt>
-                    <dd>
-                      <code>
-                        {override ? 'Свой цвет' : token} {value}
-                      </code>
-                    </dd>
-                  </div>
-                );
-              })}
-            </dl>
-          </details>
-        )}
-        {kind === 'line' && (
-          <>
-            {toggle('lineOverride', 'Свой цвет «Факт»')}
-            {s.lineOverride && color('lineColor', 'Цвет «Факт»', colors.custom)}
-            <p className="control-note">
-              Свойство <code>stroke</code> переопределяет цвет из{' '}
-              <code>RechartsThemeProvider</code>.
-            </p>
-          </>
-        )}
-        {kind !== 'line' && !emptyPie && (
-          <>
-            {color(
-              'color',
-              categories
-                ? 'Цвет «' + categoryNames[0] + '»'
-                : kind === 'scatter'
-                ? 'Цвет серии'
-                : 'Цвет «Факт»',
-              colors.actual
-            )}
-            {kind !== 'scatter' &&
-              color(
-                'secondary',
-                categories ? 'Цвет «' + categoryNames[1] + '»' : 'Цвет «План»',
-                colors.plan
+        {kind === 'line' && toggle('lineOverride', 'Свой цвет «Факт»')}
+        <dl className="palette-list">
+          {palette.map(({ label, paint, outline, edit }) => (
+            <div key={label}>
+              <dt>{label}</dt>
+              <dd>{paintRow(paint, label, edit)}</dd>
+              {outline && outline !== paint && (
+                <>
+                  <dt className="paint-outline">Контур · {label}</dt>
+                  <dd>{paintRow(outline, label)}</dd>
+                </>
               )}
-          </>
-        )}
+            </div>
+          ))}
+        </dl>
         <p className="control-note palette-sources">
           <a href={sddsSource}>Токены SDDS 0.2.1</a>
           <a href={tableSource}>Цвета таблицы</a>

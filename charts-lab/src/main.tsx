@@ -1,6 +1,10 @@
-import { lazy, Suspense, useState, useSyncExternalStore } from 'react';
+import { lazy, Suspense, useRef, useState, useSyncExternalStore } from 'react';
 import { createRoot } from 'react-dom/client';
 import { catalog, defaults, kinds, type Kind, type Settings } from './catalog';
+import { ChartLegend } from './ChartLegend';
+const Showcase = lazy(() =>
+  import('./Showcase').then((m) => ({ default: m.Showcase }))
+);
 const Capabilities = lazy(() =>
   import('./Capabilities').then((m) => ({ default: m.Capabilities }))
 );
@@ -74,9 +78,10 @@ function Bundle() {
         графика.
       </p>
       <p>
-        Стенд загружает виды через <code>React.lazy</code> при выборе вкладки.
-        Для обычного экрана достаточно статического импорта нужного вида. Для
-        загрузки по открытию экрана используйте динамический импорт.
+        В лаборатории <code>React.lazy</code> загружает выбранный вид. На
+        витрине графики подгружаются по мере прокрутки. Для обычного экрана
+        достаточно статического импорта нужного вида. Для загрузки по открытию
+        экрана используйте динамический импорт.
       </p>
       <pre>
         {
@@ -118,6 +123,7 @@ function DataTable({ data }: { data: object[] }) {
   );
 }
 const sections = [
+  { hash: '#showcase', label: 'Витрина' },
   { hash: '#lab', label: 'Лаборатория' },
   { hash: '#capabilities', label: 'Возможности' },
   { hash: '#sizes', label: 'Размер импорта' },
@@ -140,6 +146,12 @@ function Lab() {
   const page = useSyncExternalStore(subscribeToSection, currentSection);
   const [tab, setTab] = useState('Пример кода');
   const [repeat, replay] = useState(0);
+  const labTab = useRef<HTMLButtonElement>(null);
+  function openLab(next: Kind) {
+    setKind(next);
+    window.location.hash = '#lab';
+    labTab.current?.focus();
+  }
   const item = catalog[kind];
   const { data, chartTheme: _theme, ...props } = item.props(s);
   const code =
@@ -170,25 +182,6 @@ function Lab() {
     'const data = [\n' +
     data.map((row) => '  ' + JSON.stringify(row)).join(',\n') +
     '\n];';
-  const series = 'series' in props ? props.series : null;
-  const categoryData =
-    kind === 'pie' && !s.pieEmpty
-      ? catalog.pie.props(s).data
-      : kind === 'radial'
-      ? catalog.radial.props(s).data
-      : kind === 'funnel'
-      ? catalog.funnel.props(s).data
-      : kind === 'treemap'
-      ? catalog.treemap.props(s).data
-      : [];
-  const legend =
-    kind === 'line'
-      ? []
-      : series ??
-        categoryData.map((entry) => ({
-          color: entry.color,
-          label: entry.name,
-        }));
   return (
     <div className={`lab ${styles[s.theme]}`} style={tableStyle(s.theme)}>
       <header className="mast">
@@ -227,14 +220,23 @@ function Lab() {
         <header className="hero">
           <div>
             <div className="eyebrow">RECHARTS / 3.11.0</div>
-            <h1>Лаборатория графиков</h1>
-            <p>Настройте график, посмотрите код и оцените стоимость импорта.</p>
+            <h1>
+              {page.hash === '#showcase'
+                ? 'Витрина графиков'
+                : 'Лаборатория графиков'}
+            </h1>
+            <p>
+              {page.hash === '#showcase'
+                ? 'Выберите график, чтобы открыть его настройки в лаборатории.'
+                : 'Настройте график, посмотрите код и оцените стоимость импорта.'}
+            </p>
           </div>
         </header>
         <nav className="nav" aria-label="Разделы">
           {sections.map(({ hash, label }) => (
             <button
               key={hash}
+              ref={hash === '#lab' ? labTab : undefined}
               aria-pressed={page.hash === hash}
               onClick={() => {
                 window.location.hash = hash;
@@ -244,7 +246,11 @@ function Lab() {
             </button>
           ))}
         </nav>
-        {page.hash === '#lab' ? (
+        {page.hash === '#showcase' ? (
+          <Suspense fallback={<p role="status">Загрузка витрины…</p>}>
+            <Showcase theme={s.theme} openLab={openLab} />
+          </Suspense>
+        ) : page.hash === '#lab' ? (
           <>
             <div className="types" aria-label="Вид графика">
               {kinds.map((k) => (
@@ -257,7 +263,11 @@ function Lab() {
                 </button>
               ))}
             </div>
-            <div className={kind === 'line' ? 'workspace workspace-line' : 'workspace'}>
+            <div
+              className={
+                kind === 'line' ? 'workspace workspace-line' : 'workspace'
+              }
+            >
               <div className="viewer">
                 <section className="panel plot">
                   <header>
@@ -285,16 +295,7 @@ function Lab() {
                       {item.render(s)}
                     </Suspense>
                   </div>
-                  {legend.length > 0 && (
-                    <div className="legend">
-                      {legend.map((series) => (
-                        <span key={series.label}>
-                          <i style={{ background: series.color }} />
-                          {series.label}
-                        </span>
-                      ))}
-                    </div>
-                  )}
+                  <ChartLegend kind={kind} settings={s} />
                 </section>
                 <section className="panel details">
                   <header>
@@ -344,13 +345,7 @@ function Lab() {
           <Suspense
             fallback={<p role="status">Загрузка карты возможностей…</p>}
           >
-            <Capabilities
-              initial={kind}
-              openLab={(next) => {
-                setKind(next);
-                window.location.hash = '#lab';
-              }}
-            />
+            <Capabilities initial={kind} openLab={openLab} />
           </Suspense>
         ) : (
           <Bundle />

@@ -189,6 +189,29 @@ h1 {
 button:hover:not(:disabled) {
   filter: brightness(0.94);
 }
+.showcase {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 345px), 1fr));
+  gap: 16px;
+  margin: 22px 0 48px;
+}
+.showcase-card { min-width: 0; }
+.showcase-card header {
+  align-items: flex-start;
+  padding: 18px 16px 10px;
+}
+.showcase-card h2 {
+  font-size: 1.16rem;
+  margin: 0 0 4px;
+}
+.showcase-card p { font-size: .86rem; line-height: 1.4; }
+.preview-canvas { margin: 6px 10px 10px; }
+.preview-canvas > [role='status'] { font-size: .86rem; }
+.showcase-card .legend {
+  font-size: .8rem;
+  gap: 8px 14px;
+  padding-bottom: 14px;
+}
 .workspace {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(270px, 310px);
@@ -283,14 +306,6 @@ button:hover:not(:disabled) {
   height: 8px;
   border-radius: 50%;
 }
-.token-reference {
-  clear: both;
-  font-size: 0.87rem;
-  padding: 7px 0;
-}
-.token-reference summary {
-  cursor: pointer;
-}
 .controls h2 {
   font-size: 1.2rem;
   letter-spacing: -0.03em;
@@ -326,44 +341,52 @@ fieldset label,
   min-height: 32px;
   gap: 8px;
 }
-.color span {
-  display: flex;
-  gap: 6px;
+.palette-list {
+  clear: both;
+  margin: 0;
+}
+.palette-list > div {
+  padding: 6px 0 8px;
+}
+.palette-list dt {
+  margin-bottom: 3px;
+  font-size: .86rem;
+  font-weight: 600;
+}
+.palette-list dd {
+  margin: 0;
+}
+.palette-list .paint-outline {
+  margin-top: 7px;
+  font-weight: 400;
+  font-size: .8rem;
+}
+.paint-row {
+  display: grid;
+  grid-template-columns: 27px minmax(0, 1fr) auto;
   align-items: center;
-  padding: 0 5px;
-  border-radius: 5px;
-  background: var(--editable);
+  gap: 6px;
+  min-height: 27px;
+  font-size: .8rem;
 }
-.palette-tokens {
-  margin: 10px 0;
-  font-size: 0.81rem;
+.paint-chip {
+  justify-self: center;
+  width: 17px;
+  height: 17px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
 }
-.palette-tokens div,
-.palette-tokens dt,
+.paint-token { overflow-wrap: anywhere; }
+.paint-hex { font-variant-numeric: tabular-nums; }
 .palette-sources {
   display: flex;
   align-items: center;
   gap: 6px;
-}
-.palette-tokens div {
-  justify-content: space-between;
-  flex-wrap: wrap;
-  min-height: 24px;
-}
-.palette-tokens dd {
-  margin: 0;
-}
-.palette-tokens i {
-  width: 13px;
-  height: 13px;
-  border: 1px solid var(--border);
-  border-radius: 3px;
 }
 .palette-sources {
   flex-wrap: wrap;
   column-gap: 12px;
 }
-.color code,
 .range output {
   font-size: 0.8rem;
   color: var(--muted);
