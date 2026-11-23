@@ -18,6 +18,51 @@ import type { RadialChartProps } from '@chart-lab/charts/radial';
 import type { FunnelChartProps } from '@chart-lab/charts/funnel';
 
 export const defaults = {
+  nativeDraft: '',
+  nativeApplied: '',
+  tooltipEnabled: true,
+  trigger: 'hover' as 'hover' | 'click',
+  offset: 10,
+  cursorFill: '',
+  extraColor1: '',
+  extraColor2: '',
+  delay: 0,
+  xVisible: true,
+  yVisible: true,
+  reverseX: false,
+  reverseY: false,
+  xSide: 'bottom' as 'top' | 'bottom',
+  ySide: 'left' as 'left' | 'right',
+  axisFont: 12,
+  xAngle: 0,
+  gridPattern: '3 5',
+  gridDirection: 'auto' as 'auto' | 'both' | 'horizontal' | 'vertical',
+  gridWidth: 1,
+  valueLabels: false,
+  gradient: false,
+  areaBase: 'zero' as 'zero' | 'dataMin' | 'dataMax',
+  outerRadius: 85,
+  centerX: 50,
+  centerY: 50,
+  clockwise: true,
+  minAngle: 0,
+  labelLine: true,
+  cornerRadius: 0,
+  borderWidth: 1,
+  barGap: 4,
+  minSize: 0,
+  barTrack: false,
+  sharedTip: true,
+  connection: 'none' as 'none' | 'joint' | 'fitting',
+  minArea: 25,
+  spokes: true,
+  scaleMax: 100,
+  innerRadius: 21,
+  fontSize: 14,
+  labelMinWidth: 95,
+  tileLabels: true,
+  labelPosition: 'right' as 'left' | 'right' | 'center',
+  labelField: 'name' as 'name' | 'value',
   showActual: true,
   showPlan: true,
   dotRadius: 3,
@@ -53,7 +98,7 @@ export const defaults = {
   motion: true,
   duration: 750,
   easing: 'ease-out' as 'ease-out' | 'ease-in-out' | 'linear',
-  curve: 'monotone' as 'monotone' | 'step' | 'linear',
+  curve: 'monotone' as Extract<LineChartProps['curve'], string>,
   dots: true,
   opacity: 0.24,
   stacked: false,
@@ -65,7 +110,7 @@ export const defaults = {
   startAngle: 90,
   gridType: 'polygon' as 'polygon' | 'circle',
   maxArea: 340,
-  shape: 'circle' as 'circle' | 'diamond' | 'square',
+  shape: 'circle' as NonNullable<ScatterChartProps['shape']>,
   ratio: 1.6,
   theme: 'light' as ThemeName,
   lineOverride: false,
@@ -81,7 +126,7 @@ export const defaults = {
   pieEmpty: false,
 };
 export type Settings = typeof defaults;
-export function lineThemeOverrides(s: Settings) {
+export function themeOverrides(s: Settings) {
   const base = chartThemes[s.theme];
   return {
     ...(s.tooltipBackground && {
@@ -93,8 +138,12 @@ export function lineThemeOverrides(s: Settings) {
         },
       },
     }),
-    ...(s.cursorStroke && {
-      cursor: { ...base.cursor, stroke: s.cursorStroke },
+    ...((s.cursorStroke || s.cursorFill) && {
+      cursor: {
+        ...base.cursor,
+        ...(s.cursorStroke && { stroke: s.cursorStroke }),
+        ...(s.cursorFill && { fill: s.cursorFill }),
+      },
     }),
     ...(s.gridStroke && { grid: { ...base.grid, stroke: s.gridStroke } }),
   };
@@ -165,6 +214,7 @@ const tree = segments.map((name, i) => ({ name, size: total[i] }));
 const motion = (s: Settings) => ({
   enabled: s.motion,
   duration: s.duration,
+  delay: s.delay,
   easing: s.easing,
 });
 const series = (s: Settings) => {
@@ -174,24 +224,68 @@ const series = (s: Settings) => {
     {
       key: 'plan',
       label: 'План',
+      dash: s.dash || undefined,
       color: s.secondary || colors.plan,
       strokeColor: s.secondary ? undefined : colors.planStroke,
     },
   ].filter((row) => (row.key === 'actual' ? s.showActual : s.showPlan));
 };
 const channelColor = (s: Settings, name: Channel) => {
-  const override =
-    name === 'Поиск' ? s.color : name === 'Партнёры' ? s.secondary : '';
+  const override = {
+    Поиск: s.color,
+    Партнёры: s.secondary,
+    Рассылки: s.extraColor1,
+    Прямые: s.extraColor2,
+  }[name];
   return override ? { color: override } : channelPalette(s.theme, name);
 };
-const base = (s: Settings, title: string) => ({
+const markerSettings = (s: Settings) => ({
+  dots: s.dots,
+  dotShape: s.dotShape,
+  dotRadius: s.dotRadius,
+  activeRadius: s.activeRadius,
+  hollowDots: s.hollowDots,
+  activeDotAppearance: s.activeDotAppearance,
+  activeDotDuration: s.activeDotDuration,
+});
+const axisSettings = (s: Settings) => ({
+  xVisible: s.xVisible,
+  yVisible: s.yVisible,
+  reverseX: s.reverseX,
+  reverseY: s.reverseY,
+  xSide: s.xSide,
+  ySide: s.ySide,
+  fontSize: s.axisFont,
+  xAngle: s.xAngle,
+  gridPattern: s.gridPattern,
+  gridDirection: s.gridDirection,
+  gridWidth: s.gridWidth,
+});
+
+const base = (s: Settings, title: string, unit = '', comparison = false) => ({
   title,
   height: s.height,
   motion: motion(s),
-  chartTheme: chartThemes[s.theme],
+  chartTheme: { ...chartThemes[s.theme], ...themeOverrides(s) },
+  legendPosition: s.legendPosition === 'hidden' ? undefined : s.legendPosition,
+  tooltip: {
+    enabled: s.tooltipEnabled,
+    position: s.tooltipPosition,
+    appearance: s.tooltipAppearance,
+    duration: s.tooltipDuration,
+    smoothTracking: s.tooltipSmooth,
+    trigger: s.trigger,
+    offset: s.offset,
+    unit: s.tooltipKind === 'standard' ? undefined : unit,
+    compare:
+      comparison && s.tooltipKind === 'comparison'
+        ? (['actual', 'plan'] as [string, string])
+        : undefined,
+  },
 });
 const cart = (s: Settings) => ({
-  ...base(s, 'Динамика продаж'),
+  ...base(s, 'Динамика продаж', 'млн ₽', true),
+  axes: axisSettings(s),
   data: monthly,
   categoryKey: 'month',
   series: series(s),
@@ -232,7 +326,6 @@ export const catalog = {
     async () => (await import('@chart-lab/charts/line')).LineChart,
     (s) => ({
       ...cart(s),
-      chartTheme: { ...chartThemes[s.theme], ...lineThemeOverrides(s) },
       data: lineData[s.lineMissing ? 'gap' : 'full'][s.period],
       series: [
         {
@@ -248,32 +341,17 @@ export const catalog = {
           key: 'plan',
           label: 'План',
           dash: s.dash || undefined,
-          color: !s.showActual
-            ? chartColors(s.theme, true).planStroke
-            : undefined,
+          color:
+            s.secondary ||
+            (!s.showActual ? chartColors(s.theme, true).planStroke : undefined),
         },
       ].filter((row) => (row.key === 'actual' ? s.showActual : s.showPlan)),
-      dotShape: s.dotShape,
-      activeDotAppearance: s.activeDotAppearance,
-      activeDotDuration: s.activeDotDuration,
-      dotRadius: s.dotRadius,
-      activeRadius: s.activeRadius,
-      hollowDots: s.hollowDots,
+      ...markerSettings(s),
+      valueLabels: s.valueLabels,
       strokeWidth: s.width,
       curve: s.curve,
       dots: s.dots,
       connectNulls: s.lineMissing && s.connectNulls,
-      legendPosition:
-        s.legendPosition === 'hidden' ? undefined : s.legendPosition,
-      tooltip: {
-        position: s.tooltipPosition,
-        appearance: s.tooltipAppearance,
-        duration: s.tooltipDuration,
-        smoothTracking: s.tooltipSmooth,
-        unit: s.tooltipKind === 'standard' ? undefined : 'млн ₽',
-        compare:
-          s.tooltipKind === 'comparison' ? ['actual', 'plan'] : undefined,
-      },
       animationKey: 'id',
     })
   ),
@@ -285,6 +363,12 @@ export const catalog = {
     async () => (await import('@chart-lab/charts/area')).AreaChart,
     (s) => ({
       ...cart(s),
+      ...markerSettings(s),
+      data: lineData[s.lineMissing ? 'gap' : 'full'][s.period],
+      connectNulls: s.connectNulls,
+      gradient: s.gradient,
+      baseValue: s.areaBase === 'zero' ? 0 : s.areaBase,
+      valueLabels: s.valueLabels,
       strokeWidth: s.width,
       curve: s.curve,
       opacity: s.opacity,
@@ -299,6 +383,11 @@ export const catalog = {
     async () => (await import('@chart-lab/charts/bar')).BarChart,
     (s) => ({
       ...cart(s),
+      barGap: s.barGap,
+      minPointSize: s.minSize,
+      track: s.barTrack,
+      valueLabels: s.valueLabels,
+      tooltipShared: s.sharedTip,
       data: s.barMixed ? mixedBars : monthly,
       barSize: s.barSize,
       radius: s.radius,
@@ -313,7 +402,17 @@ export const catalog = {
     'Pie',
     async () => (await import('@chart-lab/charts/pie')).PieChart,
     (s) => ({
-      ...base(s, 'Источники продаж'),
+      ...base(s, 'Источники продаж', '%'),
+      cornerRadius: s.cornerRadius,
+      outerRadius: s.outerRadius,
+      centerX: s.centerX,
+      centerY: s.centerY,
+      clockwise: s.clockwise,
+      minAngle: s.minAngle,
+      borderWidth: s.borderWidth,
+      sweep: s.sweep,
+      labels: s.valueLabels,
+      labelLine: s.labelLine,
       data: segments.map((name, i) => ({
         name,
         value: s.pieEmpty ? 0 : total[i],
@@ -331,7 +430,13 @@ export const catalog = {
     'Radar',
     async () => (await import('@chart-lab/charts/radar')).RadarChart,
     (s) => ({
-      ...base(s, 'Профиль сервиса'),
+      ...base(s, 'Профиль сервиса', 'балл.', true),
+      ...markerSettings(s),
+      outerRadius: s.outerRadius,
+      startAngle: s.startAngle,
+      spokes: s.spokes,
+      scaleMax: s.scaleMax,
+      valueLabels: s.valueLabels,
       data: radar,
       categoryKey: 'metric',
       series: series(s),
@@ -349,6 +454,11 @@ export const catalog = {
     async () => (await import('@chart-lab/charts/scatter')).ScatterChart,
     (s) => ({
       ...base(s, 'Сравнение каналов'),
+      axes: axisSettings(s),
+      connection: s.connection,
+      minArea: s.minArea,
+      opacity: s.opacity,
+      valueLabels: s.valueLabels,
       data: points,
       color: s.color || chartColors(s.theme, true).actual,
       grid: s.grid,
@@ -363,7 +473,11 @@ export const catalog = {
     'Treemap',
     async () => (await import('@chart-lab/charts/treemap')).TreemapChart,
     (s) => ({
-      ...base(s, 'Структура продаж'),
+      ...base(s, 'Структура продаж', '%'),
+      radius: s.cornerRadius,
+      labels: s.tileLabels,
+      fontSize: s.fontSize,
+      labelMinWidth: s.labelMinWidth,
       data: tree.map((tile) => ({
         ...tile,
         color: channelColor(s, tile.name).color,
@@ -381,6 +495,10 @@ export const catalog = {
     async () => (await import('@chart-lab/charts/composed')).ComposedChart,
     (s) => ({
       ...cart(s),
+      ...markerSettings(s),
+      radius: s.radius,
+      curve: s.curve,
+      valueLabels: s.valueLabels,
       series: series(s).map((row) => ({
         ...row,
         kind: row.key === 'actual' ? 'bar' : 'line',
@@ -396,7 +514,12 @@ export const catalog = {
     'RadialBar',
     async () => (await import('@chart-lab/charts/radial')).RadialChart,
     (s) => ({
-      ...base(s, 'Выполнение цели'),
+      ...base(s, 'Выполнение цели', '%'),
+      cornerRadius: s.cornerRadius,
+      startAngle: s.startAngle,
+      innerRadius: s.innerRadius,
+      outerRadius: s.outerRadius,
+      valueLabels: s.valueLabels,
       data: segments.map((name, i) => ({
         name,
         value: [82, 68, 54, 39][i],
@@ -414,7 +537,11 @@ export const catalog = {
     'Funnel',
     async () => (await import('@chart-lab/charts/funnel')).FunnelChart,
     (s) => ({
-      ...base(s, 'Путь до сделки'),
+      ...base(s, 'Путь до сделки', 'шт.'),
+      fontSize: s.fontSize,
+      borderWidth: s.borderWidth,
+      labelPosition: s.labelPosition,
+      labelField: s.labelField,
       data: segments.map((key, i) => ({
         name: stages[i],
         value: [1200, 860, 540, 280][i],
@@ -428,3 +555,24 @@ export const catalog = {
 };
 export type Kind = keyof typeof catalog;
 export const kinds = Object.keys(catalog) as Kind[];
+
+export function initialSettings(kind: Kind): Settings {
+  const result = { ...defaults };
+  if (kind !== 'line') {
+    result.activeDotAppearance = 'none';
+    result.dots = false;
+    result.dash = '';
+  }
+  if (kind === 'pie') result.sweep = 360;
+  if (kind === 'radar') result.outerRadius = 78;
+  if (kind === 'radial') {
+    result.cornerRadius = 5;
+    result.outerRadius = 92;
+  }
+  if (kind === 'scatter') {
+    result.opacity = 0.8;
+    result.legendPosition = 'hidden';
+  }
+  if (kind === 'funnel') result.fontSize = 12;
+  return result;
+}

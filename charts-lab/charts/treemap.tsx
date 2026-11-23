@@ -1,5 +1,5 @@
-import { Treemap, Tooltip } from 'recharts';
-import { ChartTooltip } from './tooltip.js';
+import { Treemap } from 'recharts';
+import { InteractiveTooltip } from './interactions.js';
 import { Frame, animation, useChartStyles } from './shared.js';
 import type { FrameProps } from './shared.js';
 export type TreeItem = {
@@ -9,6 +9,10 @@ export type TreeItem = {
   children?: TreeItem[];
 };
 export interface TreemapChartProps extends FrameProps {
+  radius?: number;
+  labels?: boolean;
+  fontSize?: number;
+  labelMinWidth?: number;
   data: TreeItem[];
   color: string;
   ratio?: number;
@@ -19,14 +23,29 @@ export function TreemapChart({
   title,
   height,
   motion,
+  tooltip,
+  legendPosition,
   chartTheme,
+  radius = 0,
+  labels = true,
+  fontSize = 14,
+  labelMinWidth = 95,
   color,
   ratio = 1.6,
   strokeWidth = 3,
 }: TreemapChartProps) {
   const styles = useChartStyles(chartTheme);
   return (
-    <Frame title={title} height={height} chartTheme={chartTheme}>
+    <Frame
+      legendPosition={legendPosition}
+      legendItems={data.map((row) => ({
+        label: row.name,
+        color: row.color ?? color,
+      }))}
+      title={title}
+      height={height}
+      chartTheme={chartTheme}
+    >
       <Treemap
         data={data}
         dataKey="size"
@@ -53,34 +72,37 @@ export function TreemapChart({
                 width={width}
                 height={tileHeight}
                 className="treemap-cell"
+                rx={radius}
                 fill={typeof tileColor === 'string' ? tileColor : color}
                 stroke={styles.surface}
                 strokeWidth={strokeWidth}
               />
-              {width > 95 && tileHeight > 52 && (
-                <text
-                  x={x + 12}
-                  y={y + 25}
-                  fill={styles.text ?? 'white'}
-                  fontSize={14}
-                  stroke={styles.text ? styles.surface : undefined}
-                  strokeWidth={4}
-                  strokeLinejoin="round"
-                  paintOrder="stroke"
-                >
-                  {String(name)} · {value}
-                </text>
-              )}
+              {labels &&
+                width > labelMinWidth &&
+                tileHeight > fontSize * 2.5 && (
+                  <text
+                    x={x + 12}
+                    y={y + 25}
+                    fill={styles.text ?? 'white'}
+                    fontSize={fontSize}
+                    stroke={styles.text ? styles.surface : undefined}
+                    strokeWidth={4}
+                    strokeLinejoin="round"
+                    paintOrder="stroke"
+                  >
+                    {String(name)} · {value}
+                  </text>
+                )}
             </g>
           )
         }
         {...animation(motion)}
       >
-        <Tooltip
-          cursor={{ fill: 'none' }}
-          content={(props) => (
-            <ChartTooltip {...props} categoryKey="name" fallbackColor={color} />
-          )}
+        <InteractiveTooltip
+          options={tooltip}
+          motionEnabled={motion?.enabled !== false}
+          categoryKey="name"
+          fallbackColor={color}
         />
       </Treemap>
     </Frame>

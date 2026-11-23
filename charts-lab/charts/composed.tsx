@@ -3,11 +3,12 @@ import {
   CartesianGrid,
   ComposedChart as Engine,
   Line,
-  Tooltip,
   XAxis,
   YAxis,
+  type CurveType,
 } from 'recharts';
 import {
+  cartesianDecoration,
   Frame,
   animation,
   margin,
@@ -15,8 +16,17 @@ import {
   type CartesianProps,
   type Series,
 } from './shared.js';
-import { ChartTooltip } from './tooltip.js';
-export interface ComposedChartProps extends Omit<CartesianProps, 'series'> {
+import {
+  InteractiveTooltip,
+  markerProps,
+  type MarkerOptions,
+} from './interactions.js';
+export interface ComposedChartProps
+  extends Omit<CartesianProps, 'series'>,
+    MarkerOptions {
+  radius?: number;
+  curve?: CurveType;
+  valueLabels?: boolean;
   series: (Series & { kind: 'bar' | 'line' })[];
   barSize?: number;
   strokeWidth?: number;
@@ -29,23 +39,34 @@ export function ComposedChart({
   title,
   height,
   motion,
+  tooltip,
+  legendPosition,
   chartTheme,
+  radius = 4,
+  curve = 'monotone',
+  valueLabels = false,
+  axes,
   barSize = 20,
   strokeWidth = 3,
+  ...markers
 }: ComposedChartProps) {
   const styles = useChartStyles(chartTheme);
+  const decoration = cartesianDecoration(styles, axes);
   return (
-    <Frame title={title} height={height} chartTheme={chartTheme}>
+    <Frame
+      legendPosition={legendPosition}
+      legendItems={series.map((s) => ({
+        ...s,
+        color: s.kind === 'line' ? s.strokeColor ?? s.color : s.color,
+      }))}
+      title={title}
+      height={height}
+      chartTheme={chartTheme}
+    >
       <Engine data={data} margin={margin} aria-label={title}>
-        {grid && (
-          <CartesianGrid
-            stroke={styles.gridStroke}
-            vertical={false}
-            strokeDasharray="3 5"
-          />
-        )}
-        <XAxis {...styles.axis} dataKey={categoryKey} />
-        <YAxis {...styles.axis} width={42} />
+        {grid && <CartesianGrid {...decoration.grid} />}
+        <XAxis {...decoration.x} dataKey={categoryKey} />
+        <YAxis {...decoration.y} width={42} />
         {series.map((s) =>
           s.kind === 'bar' ? (
             <Bar
@@ -53,26 +74,34 @@ export function ComposedChart({
               name={s.label}
               dataKey={s.key}
               fill={s.color}
-              radius={4}
+              radius={radius}
+              label={valueLabels}
               barSize={barSize}
               {...animation(motion)}
             />
           ) : (
             <Line
+              {...markerProps(
+                markers,
+                styles.surface,
+                motion?.enabled !== false
+              )}
               key={s.key}
               name={s.label}
               dataKey={s.key}
-              type="monotone"
+              type={curve}
+              strokeDasharray={s.dash}
+              label={valueLabels}
               stroke={s.strokeColor ?? s.color}
               strokeWidth={strokeWidth}
-              dot={false}
               {...animation(motion)}
             />
           )
         )}
-        <Tooltip
-          cursor={{ fill: 'none' }}
-          content={(props) => <ChartTooltip {...props} />}
+        <InteractiveTooltip
+          options={tooltip}
+          motionEnabled={motion?.enabled !== false}
+          cursor={{ fill: 'none', strokeDasharray: '3 3' }}
         />
       </Engine>
     </Frame>

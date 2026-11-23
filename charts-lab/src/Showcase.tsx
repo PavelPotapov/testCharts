@@ -1,6 +1,11 @@
 import { Suspense, useEffect, useRef, useState } from 'react';
-import { catalog, defaults, kinds, type Kind, type Settings } from './catalog';
-import { ChartLegend } from './ChartLegend';
+import {
+  catalog,
+  initialSettings,
+  kinds,
+  type Kind,
+  type Settings,
+} from './catalog';
 
 function Preview({ kind, settings }: { kind: Kind; settings: Settings }) {
   const container = useRef<HTMLDivElement>(null);
@@ -44,11 +49,11 @@ export function Showcase({
   theme: Settings['theme'];
   openLab: (kind: Kind) => void;
 }) {
-  const settings = { ...defaults, theme, height: 218 };
   return (
     <section className="showcase" aria-label="Все виды графиков">
       {kinds.map((kind) => {
         const item = catalog[kind];
+        const settings = { ...initialSettings(kind), theme, height: 218 };
         return (
           <article
             key={kind}
@@ -69,7 +74,6 @@ export function Showcase({
               </button>
             </header>
             <Preview kind={kind} settings={settings} />
-            <ChartLegend kind={kind} settings={settings} />
           </article>
         );
       })}

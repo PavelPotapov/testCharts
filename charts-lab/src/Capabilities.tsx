@@ -1,3 +1,4 @@
+import { ApiReference } from './ApiReference';
 import { useState } from 'react';
 import { catalog, kinds, type Kind } from './catalog';
 import { FunctionalGuide } from './FunctionalGuide';
@@ -65,6 +66,12 @@ const guides: Record<Kind, { intro: string; doc: string; rows: Capability[] }> =
       doc: 'Area',
       rows: [
         [
+          'Настройки лаборатории',
+          'curve · strokeWidth · opacity · gradient · dots · dotShape · activeDotAppearance · baseValue · stacked · connectNulls',
+          'Граница может быть сплошной или пунктирной. Можно изменить толщину, прозрачность и градиент заливки, выбрать форму постоянной и активной точки.',
+          'lab',
+        ],
+        [
           'Граница и заливка',
           'stroke · strokeWidth · fill · fillOpacity',
           'Толщина контура независима от плотности заливки. Уменьшите заливку, чтобы видеть перекрывающиеся области.',
@@ -95,6 +102,12 @@ const guides: Record<Kind, { intro: string; doc: string; rows: Capability[] }> =
         'Числа серий сравниваются внутри одной категории. Включите смешанные знаки, чтобы увидеть базовую линию и отрицательные значения.',
       doc: 'Bar',
       rows: [
+        [
+          'Настройки лаборатории',
+          'barSize · radius · barGap · minPointSize · track · valueLabels · horizontal · stacked',
+          'Можно задавать ширину, скругление, зазор внутри группы, фоновую дорожку и подписи. Минимальная длина помогает разглядеть маленькие значения.',
+          'lab',
+        ],
         [
           'Ориентация',
           'layout · XAxis.type · YAxis.type',
@@ -129,9 +142,15 @@ const guides: Record<Kind, { intro: string; doc: string; rows: Capability[] }> =
     },
     pie: {
       intro:
-        'Метки и неотрицательные величины категорий. Сумма определяет полный оборот, а цвет привязан к категории.',
+        'Метки и неотрицательные величины категорий. Сумма заполняет выбранный размах дуги, а цвет привязан к категории.',
       doc: 'Pie',
       rows: [
+        [
+          'Настройки лаборатории',
+          'cornerRadius · gap · hole · outerRadius · startAngle · sweep · clockwise · centerX · centerY · labelLine',
+          'Можно менять внутренний и внешний радиусы, скруглять углы каждого сектора и разводить сектора зазором. Центр, начальный угол, направление, размах дуги и подписи настраиваются отдельно.',
+          'lab',
+        ],
         [
           'Круг или кольцо',
           'innerRadius · outerRadius',
@@ -152,9 +171,9 @@ const guides: Record<Kind, { intro: string; doc: string; rows: Capability[] }> =
         ],
         [
           'Внешние подписи',
-          'label · labelLine · shape',
+          'label · labelLine',
           'Можно подписать сектора снаружи и нарисовать соединители. Размещение плотных подписей и правила сокращения определяет команда.',
-          'engine',
+          'lab',
         ],
       ],
     },
@@ -163,6 +182,12 @@ const guides: Record<Kind, { intro: string; doc: string; rows: Capability[] }> =
         'У всех профилей один набор критериев в одном порядке и сопоставимых единицах.',
       doc: 'Radar',
       rows: [
+        [
+          'Настройки лаборатории',
+          'gridType · spokes · scaleMax · startAngle · outerRadius · dotShape · activeDotAppearance · opacity',
+          'Можно менять цвет и прозрачность профиля, штрих контура, форму маркеров и их появление при наведении. Сетка бывает круговой или многоугольной, её лучи включаются отдельно.',
+          'lab',
+        ],
         [
           'Профиль',
           'stroke · strokeWidth · fillOpacity',
@@ -183,9 +208,9 @@ const guides: Record<Kind, { intro: string; doc: string; rows: Capability[] }> =
         ],
         [
           'Сопоставимость шкал',
-          'PolarRadiusAxis.domain · PolarAngleAxis.tick',
+          'PolarRadiusAxis.domain · scaleMax',
           'Для сравнения нескольких карточек задайте общую радиальную шкалу. Разные единицы критериев требуют нормализации до передачи в компонент.',
-          'engine',
+          'lab',
         ],
       ],
     },
@@ -195,9 +220,15 @@ const guides: Record<Kind, { intro: string; doc: string; rows: Capability[] }> =
       doc: 'Scatter',
       rows: [
         [
+          'Настройки лаборатории',
+          'shape · opacity · minArea · maxArea · connection · valueLabels',
+          'Выберите круг, ромб, квадрат, треугольник, звезду или крест. Z задаёт площадь между двумя настраиваемыми границами. Точки можно соединить по порядку или построить линию тренда.',
+          'lab',
+        ],
+        [
           'Форма',
           'shape',
-          'Одна форма применяется ко всему набору. Можно выбрать круг, ромб или квадрат.',
+          'Одна форма применяется ко всему набору. Выберите один из шести символов.',
           'lab',
         ],
         [
@@ -225,6 +256,12 @@ const guides: Record<Kind, { intro: string; doc: string; rows: Capability[] }> =
         'Иерархия содержит узлы с дочерними элементами и листья с размером. Площадь листа пропорциональна его вкладу.',
       doc: 'Treemap',
       rows: [
+        [
+          'Настройки лаборатории',
+          'ratio · strokeWidth · radius · labels · fontSize · labelMinWidth',
+          'Можно подобрать пропорции плиток, обводку и скругление прямоугольников. Подписи можно убрать, изменить их размер или задать ширину плитки, начиная с которой виден текст.',
+          'lab',
+        ],
         [
           'Форма разбиения',
           'aspectRatio',
@@ -257,6 +294,12 @@ const guides: Record<Kind, { intro: string; doc: string; rows: Capability[] }> =
       doc: 'ComposedChart',
       rows: [
         [
+          'Настройки лаборатории',
+          'series[].kind · barSize · radius · strokeWidth · curve · dots · activeDotAppearance',
+          'Ширина и скругление столбцов задаются отдельно от толщины, кривой и штриха линии. Для линии доступны постоянные маркеры и свой эффект при наведении.',
+          'lab',
+        ],
+        [
           'Распределение слоёв',
           'ComposedChart · Bar · Line',
           'Две геометрии разделяют категории и координату наведения. Оставьте одну серию в фильтре, чтобы сравнить слои.',
@@ -282,6 +325,12 @@ const guides: Record<Kind, { intro: string; doc: string; rows: Capability[] }> =
       doc: 'RadialBar',
       rows: [
         [
+          'Настройки лаборатории',
+          'thickness · cornerRadius · track · sweep · startAngle · innerRadius · outerRadius · valueLabels',
+          'Цвет дуги, толщина, скругление концов, внутренний и внешний радиусы меняются независимо. Можно включить фон дорожек и подписи значений на дугах.',
+          'lab',
+        ],
+        [
           'Размах шкалы',
           'startAngle · endAngle · PolarAngleAxis.domain',
           'Можно сравнить четверть оборота, полукруг и полную окружность. У всех колец одна фиксированная шкала 0–100.',
@@ -302,8 +351,8 @@ const guides: Record<Kind, { intro: string; doc: string; rows: Capability[] }> =
         [
           'Подпись значения',
           'LabelList · position',
-          'Текст можно расположить на дуге или вынести в легенду. Для короткой дуги нужен порог отображения подписи.',
-          'engine',
+          'Включите значения на дугах. Чтобы скрывать подписи только на коротких дугах, укажите собственное правило отрисовки.',
+          'lab',
         ],
       ],
     },
@@ -312,6 +361,12 @@ const guides: Record<Kind, { intro: string; doc: string; rows: Capability[] }> =
         'Последовательность этапов с количеством наблюдений. На стенде — от визитов до сделок; исходный порядок определяет смысл воронки.',
       doc: 'Funnel',
       rows: [
+        [
+          'Настройки лаборатории',
+          'lastShape · reversed · labels · labelPosition · labelField · fontSize · borderWidth',
+          'Этапы можно развернуть и обвести. Выберите форму последнего этапа и выводите название или число внутри, слева либо справа от фигуры. Размер подписи меняется отдельно.',
+          'lab',
+        ],
         [
           'Направление',
           'reversed',
@@ -365,6 +420,7 @@ export function Capabilities({
           Открыть в лаборатории
         </button>
       </div>
+      <ApiReference kind={kind} />
       <h3>Технический справочник</h3>
       <p>{guide.intro}</p>
       <div className="scroll capability-table">

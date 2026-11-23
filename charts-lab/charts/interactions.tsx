@@ -1,10 +1,19 @@
 import type { CSSProperties } from 'react';
-import { Symbols, Tooltip, usePlotArea, type ActiveDotProps } from 'recharts';
+import {
+  Symbols,
+  Tooltip,
+  usePlotArea,
+  type ActiveDotProps,
+  type TooltipProps,
+} from 'recharts';
 import { ChartTooltip, type TooltipOptions } from './tooltip.js';
 
 export type MarkerShape = 'circle' | 'diamond' | 'square' | 'triangle';
 export type MarkerAppearance = 'none' | 'grow' | 'fade' | 'pulse';
-export interface LineTooltipOptions extends Partial<TooltipOptions> {
+export interface InteractiveTooltipOptions extends Partial<TooltipOptions> {
+  enabled?: boolean;
+  trigger?: 'hover' | 'click';
+  offset?: number;
   position?:
     | 'follow'
     | 'top-left'
@@ -72,34 +81,58 @@ export function ActiveMarker({
   );
 }
 
-export function LineTooltip({
+export function InteractiveTooltip({
   options,
   motionEnabled,
+  cursor = { fill: 'none' },
+  shared,
+  categoryKey,
+  fallbackColor,
+  defaultUnit = '',
 }: {
-  options?: LineTooltipOptions;
+  options?: InteractiveTooltipOptions;
   motionEnabled: boolean;
+  cursor?: TooltipProps['cursor'];
+  shared?: boolean;
+  categoryKey?: string;
+  fallbackColor?: string;
+  defaultUnit?: string;
 }) {
   const plot = usePlotArea();
   const position = options?.position ?? 'follow';
   let pinned: CSSProperties | undefined;
-  if (position !== 'follow' && plot) {
+  if (position !== 'follow') {
     const right = position.endsWith('right');
     const bottom = position.startsWith('bottom');
     const inset = 6;
     pinned = {
-      left: plot.x + (right ? plot.width - inset : inset),
-      top: plot.y + (bottom ? plot.height - inset : inset),
+      left: plot
+        ? plot.x + (right ? plot.width - inset : inset)
+        : right
+        ? 'calc(100% - 6px)'
+        : inset,
+      top: plot
+        ? plot.y + (bottom ? plot.height - inset : inset)
+        : bottom
+        ? 'calc(100% - 6px)'
+        : inset,
       transform: `translate(${right ? '-100%' : '0'}, ${
         bottom ? '-100%' : '0'
       })`,
-      maxWidth: Math.max(0, plot.width - 2 * inset),
+      maxWidth: plot
+        ? Math.max(0, plot.width - 2 * inset)
+        : 'calc(100% - 12px)',
       width: 'max-content',
     };
   }
   const appearance = motionEnabled ? options?.appearance ?? 'none' : 'none';
+  if (options?.enabled === false) return null;
   return (
     <Tooltip
-      cursor={{ fill: 'none', strokeDasharray: '3 3' }}
+      cursor={cursor}
+      shared={shared}
+      trigger={options?.trigger}
+      offset={options?.offset}
       wrapperStyle={pinned}
       isAnimationActive={
         motionEnabled &&
@@ -118,11 +151,72 @@ export function LineTooltip({
           >
             <ChartTooltip
               {...props}
-              options={{ unit: options?.unit ?? '', compare: options?.compare }}
+              categoryKey={categoryKey}
+              fallbackColor={fallbackColor}
+              options={{
+                unit: options?.unit ?? defaultUnit,
+                compare: options?.compare,
+              }}
             />
           </div>
         ) : null
       }
     />
   );
+}
+
+export interface MarkerOptions {
+  dots?: boolean;
+  dotShape?: MarkerShape;
+  activeDotAppearance?: MarkerAppearance;
+  activeDotDuration?: number;
+  dotRadius?: number;
+  activeRadius?: number;
+  hollowDots?: boolean;
+}
+export function markerProps(
+  {
+    dots = false,
+    dotShape = 'circle',
+    activeDotAppearance = 'none',
+    activeDotDuration = 240,
+    dotRadius = 3,
+    activeRadius = 5,
+    hollowDots = false,
+  }: MarkerOptions,
+  surface: string | undefined,
+  animate: boolean
+) {
+  const dot = dots
+    ? {
+        symbol: dotShape === 'circle' ? undefined : dotShape,
+        r: dotRadius,
+        strokeWidth: hollowDots ? 2 : 0,
+        strokeDasharray: 'none',
+        ...(hollowDots ? { fill: surface } : {}),
+      }
+    : false;
+  const activeDot =
+    activeRadius <= 0
+      ? false
+      : animate && activeDotAppearance !== 'none'
+      ? (point: ActiveDotProps) => (
+          <ActiveMarker
+            key={point.index}
+            point={point}
+            shape={dotShape}
+            radius={activeRadius}
+            outline={surface}
+            appearance={activeDotAppearance}
+            duration={activeDotDuration}
+          />
+        )
+      : {
+          symbol: dotShape === 'circle' ? undefined : dotShape,
+          r: activeRadius,
+          stroke: surface,
+          strokeWidth: 2,
+          strokeDasharray: 'none',
+        };
+  return { dot, activeDot };
 }

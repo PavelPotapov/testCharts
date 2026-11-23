@@ -1,7 +1,11 @@
-import { Funnel, FunnelChart as Engine, LabelList, Tooltip } from 'recharts';
+import { Funnel, FunnelChart as Engine, LabelList } from 'recharts';
 import { Frame, animation, useChartStyles, type FrameProps } from './shared.js';
-import { ChartTooltip } from './tooltip.js';
+import { InteractiveTooltip } from './interactions.js';
 export interface FunnelChartProps extends FrameProps {
+  labelPosition?: 'right' | 'center' | 'left';
+  fontSize?: number;
+  borderWidth?: number;
+  labelField?: 'name' | 'value';
   data: { name: string; value: number; color: string }[];
   reversed?: boolean;
   labels?: boolean;
@@ -12,16 +16,33 @@ export function FunnelChart({
   title,
   height,
   motion,
+  tooltip,
+  legendPosition,
   chartTheme,
+  labelPosition = 'right',
+  fontSize = 12,
+  borderWidth = 1,
+  labelField = 'name',
   reversed = false,
   labels = true,
   lastShape = 'rectangle',
 }: FunnelChartProps) {
   const styles = useChartStyles(chartTheme);
   return (
-    <Frame title={title} height={height} chartTheme={chartTheme}>
+    <Frame
+      legendPosition={legendPosition}
+      legendItems={data.map((row) => ({ label: row.name, color: row.color }))}
+      title={title}
+      height={height}
+      chartTheme={chartTheme}
+    >
       <Engine
-        margin={{ top: 10, bottom: 10, left: 16, right: labels ? 95 : 16 }}
+        margin={{
+          top: 10,
+          bottom: 10,
+          left: labels && labelPosition === 'left' ? 95 : 16,
+          right: labels && labelPosition === 'right' ? 95 : 16,
+        }}
         aria-label={title}
       >
         <Funnel
@@ -31,20 +52,23 @@ export function FunnelChart({
           reversed={reversed}
           lastShapeType={lastShape}
           stroke={styles.surface}
+          strokeWidth={borderWidth}
           {...animation(motion)}
         >
           {labels && (
             <LabelList
-              dataKey="name"
-              position="right"
+              dataKey={labelField}
+              position={labelPosition}
               fill={styles.text}
-              fontSize={12}
+              fontSize={fontSize}
             />
           )}
         </Funnel>
-        <Tooltip
+        <InteractiveTooltip
+          options={tooltip}
+          motionEnabled={motion?.enabled !== false}
           cursor={false}
-          content={(props) => <ChartTooltip {...props} categoryKey="name" />}
+          categoryKey="name"
         />
       </Engine>
     </Frame>

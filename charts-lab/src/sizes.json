@@ -8,8 +8,8 @@
   },
   {
     "mode": "line",
-    "bytes": 590746,
-    "gzip": 174823,
+    "bytes": 592251,
+    "gzip": 175371,
     "wrappers": [
       "line"
     ],
@@ -22,8 +22,8 @@
   },
   {
     "mode": "area",
-    "bytes": 576379,
-    "gzip": 171265,
+    "bytes": 580996,
+    "gzip": 172867,
     "wrappers": [
       "area"
     ],
@@ -36,8 +36,8 @@
   },
   {
     "mode": "bar",
-    "bytes": 585317,
-    "gzip": 174076,
+    "bytes": 588766,
+    "gzip": 175255,
     "wrappers": [
       "bar"
     ],
@@ -50,8 +50,8 @@
   },
   {
     "mode": "pie",
-    "bytes": 524698,
-    "gzip": 159152,
+    "bytes": 527165,
+    "gzip": 160072,
     "wrappers": [
       "pie"
     ],
@@ -64,8 +64,8 @@
   },
   {
     "mode": "radar",
-    "bytes": 550172,
-    "gzip": 164263,
+    "bytes": 554117,
+    "gzip": 165613,
     "wrappers": [
       "radar"
     ],
@@ -78,8 +78,8 @@
   },
   {
     "mode": "scatter",
-    "bytes": 568980,
-    "gzip": 170233,
+    "bytes": 572486,
+    "gzip": 171494,
     "wrappers": [
       "scatter"
     ],
@@ -92,8 +92,8 @@
   },
   {
     "mode": "treemap",
-    "bytes": 513365,
-    "gzip": 157121,
+    "bytes": 516553,
+    "gzip": 158237,
     "wrappers": [
       "treemap"
     ],
@@ -104,8 +104,8 @@
   },
   {
     "mode": "composed",
-    "bytes": 606076,
-    "gzip": 178976,
+    "bytes": 610430,
+    "gzip": 180452,
     "wrappers": [
       "composed"
     ],
@@ -118,8 +118,8 @@
   },
   {
     "mode": "radial",
-    "bytes": 544716,
-    "gzip": 163926,
+    "bytes": 547751,
+    "gzip": 164992,
     "wrappers": [
       "radial"
     ],
@@ -132,8 +132,8 @@
   },
   {
     "mode": "funnel",
-    "bytes": 528579,
-    "gzip": 159253,
+    "bytes": 531589,
+    "gzip": 160306,
     "wrappers": [
       "funnel"
     ],
@@ -146,8 +146,8 @@
   },
   {
     "mode": "all",
-    "bytes": 775376,
-    "gzip": 221776,
+    "bytes": 779463,
+    "gzip": 223030,
     "wrappers": [
       "line",
       "area",

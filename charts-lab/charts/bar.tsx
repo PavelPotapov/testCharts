@@ -4,15 +4,25 @@ import {
   BarStack,
   CartesianGrid,
   ReferenceLine,
-  Tooltip,
   XAxis,
   YAxis,
 } from 'recharts';
-import { ChartTooltip } from './tooltip.js';
-import { Frame, animation, margin, useChartStyles } from './shared.js';
+import { InteractiveTooltip } from './interactions.js';
+import {
+  cartesianDecoration,
+  Frame,
+  animation,
+  margin,
+  useChartStyles,
+} from './shared.js';
 import type { CartesianProps } from './shared.js';
 
 export interface BarChartProps extends CartesianProps {
+  barGap?: number;
+  minPointSize?: number;
+  track?: boolean;
+  valueLabels?: boolean;
+  tooltipShared?: boolean;
   barSize?: number;
   radius?: number;
   horizontal?: boolean;
@@ -25,7 +35,15 @@ export function BarChart({
   title,
   height,
   motion,
+  tooltip,
+  legendPosition,
   chartTheme,
+  barGap,
+  minPointSize,
+  track = false,
+  valueLabels = false,
+  tooltipShared,
+  axes,
   grid = true,
   barSize = 16,
   radius = 4,
@@ -33,6 +51,7 @@ export function BarChart({
   stacked = false,
 }: BarChartProps) {
   const styles = useChartStyles(chartTheme);
+  const decoration = cartesianDecoration(styles, axes, horizontal, !horizontal);
   const hasNegativeValues = data.some((row) =>
     series.some(({ key }) => {
       const value = row[key];
@@ -47,33 +66,36 @@ export function BarChart({
       fill={s.color}
       stroke={s.strokeColor}
       barSize={barSize}
+      minPointSize={minPointSize}
+      background={track ? { fill: styles.bandFill } : false}
+      label={valueLabels}
       radius={stacked ? undefined : radius}
       {...animation(motion)}
     />
   ));
   return (
-    <Frame title={title} height={height} chartTheme={chartTheme}>
+    <Frame
+      legendPosition={legendPosition}
+      legendItems={series}
+      title={title}
+      height={height}
+      chartTheme={chartTheme}
+    >
       <Engine
         data={data}
         margin={margin}
         layout={horizontal ? 'vertical' : 'horizontal'}
+        barGap={barGap}
         stackOffset="sign"
       >
-        {grid && (
-          <CartesianGrid
-            stroke={styles.gridStroke}
-            strokeDasharray="3 5"
-            vertical={horizontal}
-            horizontal={!horizontal}
-          />
-        )}
+        {grid && <CartesianGrid {...decoration.grid} />}
         <XAxis
-          {...styles.axis}
+          {...decoration.x}
           type={horizontal ? 'number' : 'category'}
           dataKey={horizontal ? undefined : categoryKey}
         />
         <YAxis
-          {...styles.axis}
+          {...decoration.y}
           width={44}
           type={horizontal ? 'category' : 'number'}
           dataKey={horizontal ? categoryKey : undefined}
@@ -85,9 +107,11 @@ export function BarChart({
             stroke={styles.referenceStroke}
           />
         )}
-        <Tooltip
+        <InteractiveTooltip
+          shared={tooltipShared}
+          options={tooltip}
+          motionEnabled={motion?.enabled !== false}
           cursor={{ fill: styles.bandFill, stroke: 'none' }}
-          content={(props) => <ChartTooltip {...props} />}
         />
         {stacked ? <BarStack radius={radius}>{bars}</BarStack> : bars}
       </Engine>

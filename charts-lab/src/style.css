@@ -220,9 +220,12 @@ button:hover:not(:disabled) {
   margin-bottom: 48px;
 }
 @media (min-width: 801px) and (min-height: 600px) {
-  .workspace-line .viewer {
+  .workspace .controls {
     position: sticky;
     top: 12px;
+    max-height: calc(100vh - 24px);
+    overflow-y: auto;
+    scrollbar-gutter: stable;
   }
 }
 .viewer {
@@ -662,3 +665,10 @@ td {
     font-size: 0.93rem;
   }
 }
+
+
+.native-editor { padding: 16px; }
+.native-editor textarea { display:block; width:100%; min-height:240px; margin-top:8px; font: 13px/1.45 monospace; resize:vertical; color:var(--ink); background:var(--surface); }
+.native-editor p,.api-reference p {line-height:1.5;overflow-wrap:anywhere}
+.api-reference label,.api-reference details {display:block;margin:10px 0}
+.api-reference input[type=search] {max-width:100%}

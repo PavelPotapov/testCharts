@@ -2,13 +2,14 @@ import { lazy, Suspense, useRef, useState, useSyncExternalStore } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
   catalog,
-  defaults,
+  initialSettings,
   kinds,
-  lineThemeOverrides,
+  themeOverrides,
   type Kind,
   type Settings,
 } from './catalog';
-import { ChartLegend } from './ChartLegend';
+
+const NativeEditor = lazy(() => import('./NativeEditor'));
 const Showcase = lazy(() =>
   import('./Showcase').then((m) => ({ default: m.Showcase }))
 );
@@ -149,7 +150,11 @@ function currentSection() {
 
 function Lab() {
   const [kind, setKind] = useState<Kind>('line');
-  const [s, set] = useState<Settings>({ ...defaults });
+  const [theme, setTheme] = useState<Settings['theme']>('light');
+  const [byKind, setByKind] = useState<Partial<Record<Kind, Settings>>>({});
+  const s = { ...(byKind[kind] ?? initialSettings(kind)), theme };
+  const set = (next: Settings) =>
+    setByKind((previous) => ({ ...previous, [kind]: next }));
   const page = useSyncExternalStore(subscribeToSection, currentSection);
   const [tab, setTab] = useState('Пример кода');
   const [repeat, replay] = useState(0);
@@ -161,8 +166,7 @@ function Lab() {
   }
   const item = catalog[kind];
   const { data, chartTheme: _theme, ...props } = item.props(s);
-  const overrides =
-    kind === 'line' ? Object.entries(lineThemeOverrides(s)) : [];
+  const overrides = Object.entries(themeOverrides(s));
   const baseTheme = 'chartThemes.' + s.theme;
   const themeCode = overrides.length
     ? [
@@ -227,10 +231,7 @@ function Lab() {
                 aria-label="Тема таблицы и графика"
                 value={s.theme}
                 onChange={(e) =>
-                  set((previous) => ({
-                    ...previous,
-                    theme: e.target.value === 'dark' ? 'dark' : 'light',
-                  }))
+                  setTheme(e.target.value === 'dark' ? 'dark' : 'light')
                 }
               >
                 <option value="light">Светлая</option>
@@ -288,11 +289,7 @@ function Lab() {
                 </button>
               ))}
             </div>
-            <div
-              className={
-                kind === 'line' ? 'workspace workspace-line' : 'workspace'
-              }
-            >
+            <div className="workspace">
               <div className="viewer">
                 <section className="panel plot">
                   <header>
@@ -320,20 +317,21 @@ function Lab() {
                       {item.render(s)}
                     </Suspense>
                   </div>
-                  <ChartLegend kind={kind} settings={s} />
                 </section>
                 <section className="panel details">
                   <header>
                     <div className="subtabs">
-                      {['Пример кода', 'Данные'].map((t) => (
-                        <button
-                          key={t}
-                          aria-pressed={tab === t}
-                          onClick={() => setTab(t)}
-                        >
-                          {t}
-                        </button>
-                      ))}
+                      {['Пример кода', 'Данные', 'Редактор Recharts'].map(
+                        (t) => (
+                          <button
+                            key={t}
+                            aria-pressed={tab === t}
+                            onClick={() => setTab(t)}
+                          >
+                            {t}
+                          </button>
+                        )
+                      )}
                     </div>
                     <div className="details-links">
                       <a
@@ -358,6 +356,18 @@ function Lab() {
                   </header>
                   {tab === 'Пример кода' ? (
                     <pre>{code}</pre>
+                  ) : tab === 'Редактор Recharts' ? (
+                    <Suspense
+                      fallback={<p role="status">Загрузка редактора…</p>}
+                    >
+                      <NativeEditor
+                        key={kind}
+                        kind={kind}
+                        settings={s}
+                        data={data}
+                        onChange={set}
+                      />
+                    </Suspense>
                   ) : (
                     <DataTable data={data} />
                   )}

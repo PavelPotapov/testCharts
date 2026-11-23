@@ -1,12 +1,12 @@
-import {
-  RadialBarChart as Engine,
-  RadialBar,
-  PolarAngleAxis,
-  Tooltip,
-} from 'recharts';
+import { RadialBarChart as Engine, RadialBar, PolarAngleAxis } from 'recharts';
 import { Frame, animation, useChartStyles, type FrameProps } from './shared.js';
-import { ChartTooltip } from './tooltip.js';
+import { InteractiveTooltip } from './interactions.js';
 export interface RadialChartProps extends FrameProps {
+  cornerRadius?: number;
+  startAngle?: number;
+  innerRadius?: number;
+  outerRadius?: number;
+  valueLabels?: boolean;
   data: { name: string; value: number; color: string }[];
   sweep?: number;
   thickness?: number;
@@ -17,20 +17,33 @@ export function RadialChart({
   title,
   height,
   motion,
+  tooltip,
+  legendPosition,
   chartTheme,
+  cornerRadius = 5,
+  startAngle = 90,
+  innerRadius = 21,
+  outerRadius = 92,
+  valueLabels = false,
   sweep = 300,
   thickness = 15,
   track = true,
 }: RadialChartProps) {
   const styles = useChartStyles(chartTheme);
   return (
-    <Frame title={title} height={height} chartTheme={chartTheme}>
+    <Frame
+      legendPosition={legendPosition}
+      legendItems={data.map((row) => ({ label: row.name, color: row.color }))}
+      title={title}
+      height={height}
+      chartTheme={chartTheme}
+    >
       <Engine
         data={data.map((row) => ({ ...row, fill: row.color }))}
-        innerRadius="21%"
-        outerRadius="92%"
-        startAngle={90}
-        endAngle={90 - sweep}
+        innerRadius={`${innerRadius}%`}
+        outerRadius={`${outerRadius}%`}
+        startAngle={startAngle}
+        endAngle={startAngle - sweep}
         barSize={thickness}
         aria-label={title}
       >
@@ -42,20 +55,20 @@ export function RadialChart({
         />
         <RadialBar
           dataKey="value"
-          cornerRadius={5}
+          cornerRadius={cornerRadius}
+          label={
+            valueLabels ? { position: 'insideEnd', fill: styles.text } : false
+          }
           background={track ? { fill: styles.bandFill } : false}
           {...animation(motion)}
         />
-        <Tooltip
-          shared={false}
+        <InteractiveTooltip
+          options={tooltip}
+          motionEnabled={motion?.enabled !== false}
           cursor={false}
-          content={(props) => (
-            <ChartTooltip
-              {...props}
-              categoryKey="name"
-              options={{ unit: '%' }}
-            />
-          )}
+          shared={false}
+          categoryKey="name"
+          defaultUnit="%"
         />
       </Engine>
     </Frame>

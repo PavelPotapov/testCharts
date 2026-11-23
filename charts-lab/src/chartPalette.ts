@@ -1,7 +1,12 @@
 import { chartColors } from '@chart-lab/charts/theme';
 import { catalog, type Kind, type Settings } from './catalog';
 
-export type ColorSetting = 'color' | 'secondary' | 'lineColor';
+export type ColorSetting =
+  | 'color'
+  | 'secondary'
+  | 'lineColor'
+  | 'extraColor1'
+  | 'extraColor2';
 export interface PaletteEntry {
   label: string;
   paint: string;
@@ -18,7 +23,12 @@ export function chartPalette(kind: Kind, s: Settings): PaletteEntry[] {
       label: row.label,
       paint:
         row.color ?? (row.key === 'actual' ? colors.actual : colors.planStroke),
-      edit: row.key === 'actual' && s.lineOverride ? 'lineColor' : undefined,
+      edit:
+        row.key === 'plan'
+          ? 'secondary'
+          : s.lineOverride
+          ? 'lineColor'
+          : undefined,
       visible: row.key === 'actual' ? s.showActual : s.showPlan,
     }));
   }
@@ -39,7 +49,7 @@ export function chartPalette(kind: Kind, s: Settings): PaletteEntry[] {
       label: row.name,
       paint: row.color ?? chartColors(s.theme, true).actual,
       outline: 'strokeColor' in row ? row.strokeColor : undefined,
-      edit: i === 0 ? 'color' : i === 1 ? 'secondary' : undefined,
+      edit: (['color', 'secondary', 'extraColor1', 'extraColor2'] as const)[i],
     }));
   }
   return catalog[kind].props(bothSeries).series.map((row) => {
