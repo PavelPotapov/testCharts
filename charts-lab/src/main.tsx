@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useState, useSyncExternalStore } from 'react';
 import { createRoot } from 'react-dom/client';
 import { catalog, defaults, kinds, type Kind, type Settings } from './catalog';
 const Capabilities = lazy(() =>
@@ -32,7 +32,8 @@ function Bundle() {
       <p>
         Количество независимых production-сборок Vite — {sizes.length}. Каждая
         включает React 18.3.1 и React DOM. Таблица показывает размер
-        минифицированного JavaScript и его размер после gzip. Общий CSS двух тем SDDS и интерфейса стенда загружается отдельным файлом.
+        минифицированного JavaScript и его размер после gzip. Общий CSS двух тем
+        SDDS и интерфейса стенда загружается отдельным файлом.
       </p>
       <div className="scroll">
         <table>
@@ -116,10 +117,27 @@ function DataTable({ data }: { data: object[] }) {
     </div>
   );
 }
+const sections = [
+  { hash: '#lab', label: 'Лаборатория' },
+  { hash: '#capabilities', label: 'Возможности' },
+  { hash: '#sizes', label: 'Размер импорта' },
+] as const;
+
+function subscribeToSection(notify: () => void) {
+  window.addEventListener('hashchange', notify);
+  return () => window.removeEventListener('hashchange', notify);
+}
+
+function currentSection() {
+  return (
+    sections.find(({ hash }) => hash === window.location.hash) ?? sections[0]
+  );
+}
+
 function Lab() {
   const [kind, setKind] = useState<Kind>('line');
   const [s, set] = useState<Settings>({ ...defaults });
-  const [page, setPage] = useState('Лаборатория');
+  const page = useSyncExternalStore(subscribeToSection, currentSection);
   const [tab, setTab] = useState('Пример кода');
   const [repeat, replay] = useState(0);
   const item = catalog[kind];
@@ -214,17 +232,19 @@ function Lab() {
           </div>
         </header>
         <nav className="nav" aria-label="Разделы">
-          {['Лаборатория', 'Возможности', 'Размер импорта'].map((n) => (
+          {sections.map(({ hash, label }) => (
             <button
-              key={n}
-              aria-pressed={page === n}
-              onClick={() => setPage(n)}
+              key={hash}
+              aria-pressed={page.hash === hash}
+              onClick={() => {
+                window.location.hash = hash;
+              }}
             >
-              {n}
+              {label}
             </button>
           ))}
         </nav>
-        {page === 'Лаборатория' ? (
+        {page.hash === '#lab' ? (
           <>
             <div className="types" aria-label="Вид графика">
               {kinds.map((k) => (
@@ -320,7 +340,7 @@ function Lab() {
               <Controls kind={kind} settings={s} onChange={set} />
             </div>
           </>
-        ) : page === 'Возможности' ? (
+        ) : page.hash === '#capabilities' ? (
           <Suspense
             fallback={<p role="status">Загрузка карты возможностей…</p>}
           >
@@ -328,7 +348,7 @@ function Lab() {
               initial={kind}
               openLab={(next) => {
                 setKind(next);
-                setPage('Лаборатория');
+                window.location.hash = '#lab';
               }}
             />
           </Suspense>

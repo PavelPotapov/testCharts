@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { catalog, kinds, type Kind } from './catalog';
+import { FunctionalGuide } from './FunctionalGuide';
+
 type Capability = [
   name: string,
   api: string,
@@ -28,7 +30,7 @@ const guides: Record<Kind, { intro: string; doc: string; rows: Capability[] }> =
         [
           'Активная точка',
           'activeDot.r · activeDot.stroke',
-          'Радиус при наведении независим от постоянных маркеров. При 0 остаётся только подсказка.',
+          'Размер точки при наведении задаётся отдельно. При радиусе 0 активная точка скрыта, координата и карточка остаются видны.',
           'lab',
         ],
         [
@@ -189,7 +191,7 @@ const guides: Record<Kind, { intro: string; doc: string; rows: Capability[] }> =
         [
           'Форма',
           'shape',
-          'Круг, ромб или квадрат кодируют категорию дополнительно к цвету.',
+          'Одна форма применяется ко всему набору. Можно выбрать круг, ромб или квадрат.',
           'lab',
         ],
         [
@@ -331,38 +333,6 @@ const guides: Record<Kind, { intro: string; doc: string; rows: Capability[] }> =
       ],
     },
   };
-const common = [
-  [
-    'Размер и оси',
-    'ResponsiveContainer · domain · ticks · tickFormatter',
-    'Контейнеру нужна измеримая высота. Числовая шкала сохраняет расстояние между нерегулярными датами. Категориальная шкала ставит метки через равные интервалы.',
-    'XAxis',
-  ],
-  [
-    'Цвета и тема',
-    'RechartsThemeProvider · stroke · fill',
-    'Тема задаёт значения по умолчанию. Явный цвет серии перекрывает тему. Для устойчивых цветов после фильтрации привяжите палитру к ключам серий.',
-    'RechartsThemeProvider',
-  ],
-  [
-    'Наведение и выбор',
-    'Tooltip.content · cursor · onClick',
-    'Курсор выделяет координату, карточка подписывает значения. Для выбора записи возвращайте команде ключ серии и исходную строку.',
-    'Tooltip',
-  ],
-  [
-    'Движение',
-    'animationDuration · animationEasing · animationMatchBy',
-    'Скорость и easing меняют темп. При сортировке и сдвиге окна точки сопоставляются по устойчивому ключу. Режим auto учитывает сокращение движения в системе.',
-    'Line',
-  ],
-  [
-    'Легенда и доступность',
-    'Legend.content · verticalAlign · accessibilityLayer',
-    'Фильтрация требует состояния в приложении. Цвет дублируйте штрихом или подписью, оставьте доступ к числам в таблице и при работе с клавиатуры.',
-    'Legend',
-  ],
-];
 export function Capabilities({
   initial,
   openLab,
@@ -383,6 +353,13 @@ export function Capabilities({
         ))}
       </div>
       <h3>{catalog[kind].label}</h3>
+      <FunctionalGuide kind={kind} />
+      <div className="guide-actions">
+        <button className="replay" onClick={() => openLab(kind)}>
+          Открыть в лаборатории
+        </button>
+      </div>
+      <h3>Технический справочник</h3>
       <p>{guide.intro}</p>
       <div className="scroll capability-table">
         <table>
@@ -409,28 +386,32 @@ export function Capabilities({
         </table>
       </div>
       <div className="guide-actions">
-        <button className="replay" onClick={() => openLab(kind)}>
-          Открыть в лаборатории
-        </button>
         <a href={'https://recharts.github.io/en-US/api/' + guide.doc + '/'}>
           Документация Recharts
         </a>
+        <a
+          href={
+            'https://github.com/PavelPotapov/testCharts/blob/main/charts-lab/charts/' +
+            kind +
+            '.tsx'
+          }
+        >
+          Параметры обёртки в коде
+        </a>
+        <a href="https://recharts.github.io/en-US/api/Tooltip/">
+          Подсказка в Recharts
+        </a>
+        <a href="https://recharts.github.io/en-US/api/Legend/">
+          Легенда в Recharts
+        </a>
       </div>
-      <h3>Общие настройки и контракт обёртки</h3>
-      {common.map(([title, api, effect, doc]) => (
-        <details className="guide-detail" key={title}>
-          <summary>{title}</summary>
-          <p>{effect}</p>
-          <a href={'https://recharts.github.io/en-US/api/' + doc + '/'}>
-            {api}
-          </a>
-        </details>
-      ))}
       <h3>Специальные виды</h3>
       <p>
-        Для тепловой карты потребуется матрица X × Y и своя шкала цвета. Sankey
-        принимает узлы и связи с весами, SunburstChart — дерево вложенных долей.
-        Эти три модели данных и границы их применения разобраны в исследовании.
+        В Recharts есть ещё диаграмма потоков Sankey и многоуровневая круговая
+        диаграмма SunburstChart. У Sankey ширина связи показывает объём потока,
+        у SunburstChart кольца показывают уровни иерархии. Для обоих видов
+        предстоит сделать обёртки. Тепловую карту можно собрать отдельно из
+        ячеек и шкалы цвета.
       </p>
       <a href="https://github.com/PavelPotapov/testCharts/blob/main/charts-lab/RESEARCH.md">
         Исследование и предложение по API для команд

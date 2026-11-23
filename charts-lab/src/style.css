@@ -488,6 +488,38 @@ pre {
   font-weight: 600;
   cursor: pointer;
 }
+.reading .guide-summary {
+  font-size: 1.07rem;
+  max-width: 72ch;
+  margin-bottom: 20px;
+}
+.guide-detail summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.guide-answers {
+  margin: 14px 0 4px;
+}
+.guide-answers > div {
+  display: grid;
+  grid-template-columns: minmax(11rem, 15rem) minmax(0, 69ch);
+  gap: 16px;
+  padding: 9px 0;
+  line-height: 1.5;
+}
+.guide-answers dt {
+  font-weight: 600;
+}
+.guide-answers dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 700px) {
+  .guide-answers > div {
+    grid-template-columns: 1fr;
+    gap: 3px;
+  }
+}
 .reading td code {
   overflow-wrap: anywhere;
 }
