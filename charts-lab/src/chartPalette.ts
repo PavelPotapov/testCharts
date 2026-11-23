@@ -1,4 +1,4 @@
-import { chartColors, dataPaint, dataTokens } from '@chart-lab/charts/theme';
+import { chartColors } from '@chart-lab/charts/theme';
 import { catalog, type Kind, type Settings } from './catalog';
 
 export type ColorSetting = 'color' | 'secondary' | 'lineColor';
@@ -8,19 +8,6 @@ export interface PaletteEntry {
   outline?: string;
   edit?: ColorSetting;
   visible?: boolean;
-}
-
-type Token = keyof typeof dataTokens.light;
-const tokens = Object.keys(dataTokens.light) as Token[];
-
-// Read the same paint expression the chart receives. A literal stays a manual
-// color even when its HEX happens to match a design token.
-export function identifyPaint(paint: string, theme: Settings['theme']) {
-  const token = tokens.find((name) => dataPaint(theme, name) === paint);
-  return {
-    token,
-    hex: (token ? dataTokens[theme][token] : paint).toUpperCase(),
-  };
 }
 
 export function chartPalette(kind: Kind, s: Settings): PaletteEntry[] {

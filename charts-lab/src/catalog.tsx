@@ -35,6 +35,9 @@ export const defaults = {
   >,
   tooltipDuration: 250,
   tooltipSmooth: true,
+  tooltipBackground: '',
+  cursorStroke: '',
+  gridStroke: '',
   hollowDots: false,
   dash: '6 4',
   sweep: 300,
@@ -78,6 +81,24 @@ export const defaults = {
   pieEmpty: false,
 };
 export type Settings = typeof defaults;
+export function lineThemeOverrides(s: Settings) {
+  const base = chartThemes[s.theme];
+  return {
+    ...(s.tooltipBackground && {
+      tooltip: {
+        ...base.tooltip,
+        contentStyle: {
+          ...base.tooltip?.contentStyle,
+          background: s.tooltipBackground,
+        },
+      },
+    }),
+    ...(s.cursorStroke && {
+      cursor: { ...base.cursor, stroke: s.cursorStroke },
+    }),
+    ...(s.gridStroke && { grid: { ...base.grid, stroke: s.gridStroke } }),
+  };
+}
 const months = [
   'Янв',
   'Фев',
@@ -211,6 +232,7 @@ export const catalog = {
     async () => (await import('@chart-lab/charts/line')).LineChart,
     (s) => ({
       ...cart(s),
+      chartTheme: { ...chartThemes[s.theme], ...lineThemeOverrides(s) },
       data: lineData[s.lineMissing ? 'gap' : 'full'][s.period],
       series: [
         {

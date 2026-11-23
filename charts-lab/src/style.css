@@ -377,6 +377,15 @@ fieldset label,
   border-radius: 4px;
 }
 .paint-token { overflow-wrap: anywhere; }
+.paint-path {
+  display: block;
+  margin: 2px 0 0 33px;
+  font-size: .73rem;
+  overflow-wrap: anywhere;
+}
+.line-detail-colors dd button {
+  margin-left: 33px;
+}
 .paint-hex { font-variant-numeric: tabular-nums; }
 .palette-sources {
   display: flex;

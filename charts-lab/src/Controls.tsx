@@ -1,5 +1,7 @@
 import { defaults, type Kind, type Settings } from './catalog';
-import { chartPalette, identifyPaint, type ColorSetting } from './chartPalette';
+import { chartPalette } from './chartPalette';
+import { PaintRow } from './PaintRow';
+import { chartThemes } from '@chart-lab/charts/theme';
 import { sddsSource, tableSource } from './palette';
 
 type Props = {
@@ -72,35 +74,29 @@ export function Controls({ kind, settings: s, onChange }: Props) {
     </div>
   );
   const palette = chartPalette(kind, s);
+  const theme = chartThemes[s.theme];
+  const details = [
+    {
+      key: 'tooltipBackground',
+      label: 'Фон карточки подсказки',
+      path: 'tooltip.contentStyle.background',
+      paint: theme.tooltip?.contentStyle?.background,
+    },
+    {
+      key: 'cursorStroke',
+      label: 'Пунктир при наведении',
+      path: 'cursor.stroke',
+      paint: theme.cursor?.stroke,
+    },
+    {
+      key: 'gridStroke',
+      label: 'Линии сетки',
+      path: 'grid.stroke',
+      paint: theme.grid?.stroke,
+    },
+  ] as const;
   const hasSeries = ['line', 'area', 'bar', 'radar', 'composed'].includes(kind);
   const emptyPie = kind === 'pie' && s.pieEmpty;
-  const paintRow = (paint: string, label: string, edit?: ColorSetting) => {
-    const { token, hex } = identifyPaint(paint, s.theme);
-    return (
-      <div className="paint-row">
-        {edit ? (
-          <input
-            type="color"
-            aria-label={'Цвет «' + label + '»'}
-            value={hex}
-            onChange={(e) => set(edit, e.target.value)}
-          />
-        ) : (
-          <i
-            className="paint-chip"
-            aria-hidden="true"
-            style={{ background: paint }}
-          />
-        )}
-        {token ? (
-          <code className="paint-token">--{token}</code>
-        ) : (
-          <span className="paint-token">Вручную</span>
-        )}
-        <code className="paint-hex">{hex}</code>
-      </div>
-    );
-  };
   return (
     <aside className="panel controls">
       <header>
@@ -195,6 +191,40 @@ export function Controls({ kind, settings: s, onChange }: Props) {
           </fieldset>
         </>
       )}
+      {kind === 'line' && (
+        <fieldset className="line-detail-colors">
+          <legend>Цвета подсказки и сетки</legend>
+          <dl className="palette-list">
+            {details.map(
+              ({ key, label, path, paint }) =>
+                typeof paint === 'string' && (
+                  <div key={key}>
+                    <dt>{label}</dt>
+                    <dd>
+                      <PaintRow
+                        theme={s.theme}
+                        paint={s[key] || paint}
+                        label={label}
+                        onChange={(value) => set(key, value)}
+                      />
+                      <code className="paint-path">chartTheme.{path}</code>
+                      {s[key] && (
+                        <button
+                          type="button"
+                          className="text"
+                          onClick={() => set(key, '')}
+                          aria-label={'Вернуть токен · ' + label}
+                        >
+                          Вернуть токен
+                        </button>
+                      )}
+                    </dd>
+                  </div>
+                )
+            )}
+          </dl>
+        </fieldset>
+      )}
       {hasSeries && (
         <fieldset>
           <legend>Видимые серии</legend>
@@ -229,11 +259,20 @@ export function Controls({ kind, settings: s, onChange }: Props) {
           {palette.map(({ label, paint, outline, edit }) => (
             <div key={label}>
               <dt>{label}</dt>
-              <dd>{paintRow(paint, label, edit)}</dd>
+              <dd>
+                <PaintRow
+                  paint={paint}
+                  label={label}
+                  theme={s.theme}
+                  onChange={edit ? (value) => set(edit, value) : undefined}
+                />
+              </dd>
               {outline && outline !== paint && (
                 <>
                   <dt className="paint-outline">Контур · {label}</dt>
-                  <dd>{paintRow(outline, label)}</dd>
+                  <dd>
+                    <PaintRow paint={outline} label={label} theme={s.theme} />
+                  </dd>
                 </>
               )}
             </div>

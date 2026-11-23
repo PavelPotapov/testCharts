@@ -1,6 +1,13 @@
 import { lazy, Suspense, useRef, useState, useSyncExternalStore } from 'react';
 import { createRoot } from 'react-dom/client';
-import { catalog, defaults, kinds, type Kind, type Settings } from './catalog';
+import {
+  catalog,
+  defaults,
+  kinds,
+  lineThemeOverrides,
+  type Kind,
+  type Settings,
+} from './catalog';
 import { ChartLegend } from './ChartLegend';
 const Showcase = lazy(() =>
   import('./Showcase').then((m) => ({ default: m.Showcase }))
@@ -154,6 +161,24 @@ function Lab() {
   }
   const item = catalog[kind];
   const { data, chartTheme: _theme, ...props } = item.props(s);
+  const overrides =
+    kind === 'line' ? Object.entries(lineThemeOverrides(s)) : [];
+  const baseTheme = 'chartThemes.' + s.theme;
+  const themeCode = overrides.length
+    ? [
+        '{',
+        '      ...' + baseTheme + ',',
+        ...overrides.map(
+          ([key, value]) =>
+            '      ' +
+            key +
+            ': ' +
+            JSON.stringify(value, null, 2).replaceAll('\n', '\n      ') +
+            ','
+        ),
+        '    }',
+      ].join('\n')
+    : baseTheme;
   const code =
     'import { ' +
     item.name +
@@ -164,8 +189,8 @@ function Lab() {
     'export function Example() {\n  return <' +
     item.name +
     '\n    data={data}\n' +
-    '    chartTheme={chartThemes.' +
-    s.theme +
+    '    chartTheme={' +
+    themeCode +
     '}\n' +
     Object.entries(props)
       .filter(([, value]) => value !== undefined)
