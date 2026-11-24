@@ -1,4 +1,11 @@
-import { lazy, Suspense, useRef, useState, useSyncExternalStore } from 'react';
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import { createRoot } from 'react-dom/client';
 import {
   catalog,
@@ -17,6 +24,8 @@ const Capabilities = lazy(() =>
   import('./Capabilities').then((m) => ({ default: m.Capabilities }))
 );
 import { Controls } from './Controls';
+import { PresetBar } from './PresetBar';
+import { loadSaved, saveSettings, type ByKind } from './presets';
 import { tableStyle } from './palette';
 import sizes from './sizes.json';
 import styles from '@sddsjs/sdds_finai/css/sdds_finai_default.module.css';
@@ -149,9 +158,13 @@ function currentSection() {
 }
 
 function Lab() {
+  const [saved] = useState(loadSaved);
   const [kind, setKind] = useState<Kind>('line');
-  const [theme, setTheme] = useState<Settings['theme']>('light');
-  const [byKind, setByKind] = useState<Partial<Record<Kind, Settings>>>({});
+  const [theme, setTheme] = useState<Settings['theme']>(
+    saved.theme ?? 'light'
+  );
+  const [byKind, setByKind] = useState<ByKind>(saved.byKind);
+  useEffect(() => saveSettings(theme, byKind), [theme, byKind]);
   const s = { ...(byKind[kind] ?? initialSettings(kind)), theme };
   const set = (next: Settings) =>
     setByKind((previous) => ({ ...previous, [kind]: next }));
@@ -289,6 +302,16 @@ function Lab() {
                 </button>
               ))}
             </div>
+            <PresetBar
+              kind={kind}
+              theme={s.theme}
+              byKind={byKind}
+              onImport={(nextTheme, imported, first) => {
+                setByKind((previous) => ({ ...previous, ...imported }));
+                if (nextTheme) setTheme(nextTheme);
+                if (!imported[kind]) setKind(first);
+              }}
+            />
             <div className="workspace">
               <div className="viewer">
                 <section className="panel plot">
