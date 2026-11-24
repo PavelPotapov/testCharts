@@ -49,6 +49,10 @@
     "./funnel": {
       "types": "./lib/funnel.d.ts",
       "import": "./lib/funnel.js"
+    },
+    "./kpi": {
+      "types": "./lib/kpi.d.ts",
+      "import": "./lib/kpi.js"
     }
   },
   "scripts": {
