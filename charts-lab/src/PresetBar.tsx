@@ -7,7 +7,11 @@ type Props = {
   kind: Kind;
   theme: ThemeName;
   byKind: ByKind;
-  onImport: (theme: ThemeName | undefined, byKind: ByKind, first: Kind) => void;
+  onImport: (
+    theme: ThemeName | undefined,
+    byKind: ByKind,
+    first?: Kind
+  ) => void;
 };
 
 function params(n: number) {
@@ -62,20 +66,19 @@ export function PresetBar({ kind, theme, byKind, onImport }: Props) {
   function apply() {
     try {
       const parsed = parsePreset(draft);
-      if (!parsed.applied.length) {
-        setMessage('В тексте нет настроек видов');
+      const skipped = parsed.skipped.length
+        ? '. Пропущено: ' + parsed.skipped.join(', ')
+        : '';
+      if (!parsed.applied.length && !parsed.theme) {
+        setMessage('В тексте нет применимых настроек' + skipped);
         return;
       }
-      onImport(parsed.theme, parsed.byKind, parsed.applied[0].kind);
+      onImport(parsed.theme, parsed.byKind, parsed.applied[0]?.kind);
       setPasting(false);
       setDraft('');
       setManual('');
       setMessage(
-        'Применено: ' +
-          describe(parsed.applied) +
-          (parsed.skipped.length
-            ? '. Пропущено: ' + parsed.skipped.join(', ')
-            : '')
+        'Применено: ' + (describe(parsed.applied) || 'тема') + skipped
       );
     } catch (error) {
       setMessage(
@@ -117,11 +120,7 @@ export function PresetBar({ kind, theme, byKind, onImport }: Props) {
             onChange={(e) => setDraft(e.target.value)}
           />
           <div className="preset-paste-actions">
-            <button
-              className="replay"
-              disabled={!draft.trim()}
-              onClick={apply}
-            >
+            <button className="replay" disabled={!draft.trim()} onClick={apply}>
               Применить
             </button>
             <button
