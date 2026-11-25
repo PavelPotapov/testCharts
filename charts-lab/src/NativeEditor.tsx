@@ -45,8 +45,7 @@ import {
   LabelList,
 } from 'recharts';
 import { chartThemes } from '@chart-lab/charts/theme';
-import { nativeRecipe, type Recipe } from './nativeRecipe';
-import { apiComponents } from './apiComponents';
+import { nativeRecipe, parseNativeRecipe, type Recipe } from './nativeRecipe';
 import { ApiReference } from './ApiReference';
 import type { Kind, Settings } from './catalog';
 const registry: Record<string, ElementType> = {
@@ -86,46 +85,6 @@ const registry: Record<string, ElementType> = {
   Label,
   LabelList,
 };
-function parse(text: string, kind: Kind): Recipe {
-  const available = apiComponents(kind);
-  if (text.length > 50000)
-    throw Error('Размер примера ограничен 50 000 символами.');
-  const value = JSON.parse(text, (key, v) => {
-    if (
-      [
-        '__proto__',
-        'constructor',
-        'prototype',
-        'dangerouslySetInnerHTML',
-        'ref',
-        'portal',
-      ].includes(key) ||
-      /^on[A-Z]/.test(key)
-    )
-      throw Error('Это свойство задаётся из React-кода: ' + key);
-    return v;
-  });
-  function validate(node: Recipe, depth: number) {
-    if (!node || !available.includes(node.component) || depth > 12)
-      throw Error('Проверьте имя компонента и глубину вложения.');
-    if (
-      node.props &&
-      (typeof node.props !== 'object' ||
-        Array.isArray(node.props) ||
-        'children' in node.props)
-    )
-      throw Error(
-        'props должен быть объектом. Дочерние компоненты задаются в children.'
-      );
-    if (node.children && !Array.isArray(node.children))
-      throw Error('children должен быть массивом компонентов.');
-    node.children?.forEach((child) => validate(child, depth + 1));
-  }
-  validate(value, 0);
-  if (value.component !== available[0])
-    throw Error('Корневой компонент для этого графика — ' + available[0]);
-  return value;
-}
 function render(node: Recipe, data: object[], key = 0): React.ReactElement {
   const props = { ...node.props };
   if (props.data === '$data') props.data = data;
@@ -185,7 +144,7 @@ export default function NativeEditor({
         <RechartsThemeProvider value={chartThemes[s.theme]}>
           <div style={{ height: 280, minWidth: 0 }} className="native-preview">
             <ResponsiveContainer width="100%" height="100%">
-              {render(parse(applied, kind), rows)}
+              {render(parseNativeRecipe(applied, kind), rows)}
             </ResponsiveContainer>
           </div>
         </RechartsThemeProvider>
@@ -211,7 +170,7 @@ export default function NativeEditor({
           className="replay"
           onClick={() => {
             try {
-              parse(draft, kind);
+              parseNativeRecipe(draft, kind);
               setError('');
               onChange({ ...s, nativeDraft: draft, nativeApplied: draft });
             } catch (e) {

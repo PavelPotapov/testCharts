@@ -672,3 +672,43 @@ td {
 .native-editor p,.api-reference p {line-height:1.5;overflow-wrap:anywhere}
 .api-reference label,.api-reference details {display:block;margin:10px 0}
 .api-reference input[type=search] {max-width:100%}
+.preset-bar {
+  margin: -8px 0 16px;
+}
+.preset-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 20px;
+}
+.preset-bar .text {
+  padding: 4px 0;
+  font-size: 0.89rem;
+  color: var(--accent);
+}
+.preset-status {
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
+.preset-paste,
+.preset-manual {
+  margin-top: 10px;
+}
+.preset-bar textarea {
+  display: block;
+  width: 100%;
+  min-height: 140px;
+  padding: 10px;
+  font: 13px/1.45 monospace;
+  resize: vertical;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+}
+.preset-paste-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+}

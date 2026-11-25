@@ -1,4 +1,5 @@
 import { initialSettings, type Kind, type Settings } from './catalog';
+import { settingOptions } from './settingOptions';
 import { chartPalette } from './chartPalette';
 import { PaintRow } from './PaintRow';
 import { chartThemes } from '@chart-lab/charts/theme';
@@ -130,31 +131,9 @@ export function Controls({ kind, settings: s, onChange }: Props) {
             ' px'
           )}
         {['line', 'area', 'composed'].includes(kind) &&
-          select('curve', 'Кривая', [
-            ['monotone', 'Плавная'],
-            ['linear', 'Ломаная'],
-            ['step', 'Ступени по середине'],
-            ['stepBefore', 'Ступени в начале'],
-            ['stepAfter', 'Ступени в конце'],
-            ['natural', 'Естественный сплайн'],
-            ['basis', 'Сглаженный сплайн'],
-            ['basisOpen', 'Открытый сплайн'],
-            ['basisClosed', 'Замкнутый сплайн'],
-            ['linearClosed', 'Замкнутая ломаная'],
-            ['monotoneX', 'Монотонная по X'],
-            ['monotoneY', 'Монотонная по Y'],
-            ['bump', 'Изгиб по направлению графика'],
-            ['bumpX', 'Изгиб по X'],
-            ['bumpY', 'Изгиб по Y'],
-          ])}
+          select('curve', 'Кривая', settingOptions.curve)}
         {hasMarkers && (
-          <>
-            {select('dash', 'Штрих «План»', [
-              ['6 4', 'Пунктир'],
-              ['2 4', 'Короткий'],
-              ['', 'Сплошной'],
-            ])}
-          </>
+          <>{select('dash', 'Штрих «План»', settingOptions.dash)}</>
         )}
         {kind === 'composed' &&
           range('barSize', 'Ширина столбца', 4, 32, ' px')}
@@ -169,10 +148,7 @@ export function Controls({ kind, settings: s, onChange }: Props) {
           <>
             {toggle('funnelLabels', 'Подписи этапов')}
             {toggle('reversed', 'Развернуть воронку')}
-            {select('tip', 'Последний этап', [
-              ['rectangle', 'Прямоугольник'],
-              ['triangle', 'Треугольник'],
-            ])}
+            {select('tip', 'Последний этап', settingOptions.tip)}
           </>
         )}
         {['area', 'radar', 'scatter'].includes(kind) &&
@@ -199,20 +175,10 @@ export function Controls({ kind, settings: s, onChange }: Props) {
           </>
         )}
         {kind === 'radar' &&
-          select('gridType', 'Форма сетки', [
-            ['polygon', 'Многоугольник'],
-            ['circle', 'Круг'],
-          ])}
+          select('gridType', 'Форма сетки', settingOptions.gridType)}
         {kind === 'scatter' && (
           <>
-            {select('shape', 'Маркер', [
-              ['circle', 'Круг'],
-              ['diamond', 'Ромб'],
-              ['square', 'Квадрат'],
-              ['triangle', 'Треугольник'],
-              ['star', 'Звезда'],
-              ['cross', 'Крест'],
-            ])}
+            {select('shape', 'Маркер', settingOptions.shape)}
             {range('maxArea', 'Площадь маркера', 100, 900, ' px²', 10)}
           </>
         )}
@@ -222,11 +188,7 @@ export function Controls({ kind, settings: s, onChange }: Props) {
           <>
             {toggle('gradient', 'Градиент заливки')}
             {!s.stacked &&
-              select('areaBase', 'Основание области', [
-                ['zero', 'Ноль'],
-                ['dataMin', 'Минимум шкалы'],
-                ['dataMax', 'Максимум шкалы'],
-              ])}
+              select('areaBase', 'Основание области', settingOptions.areaBase)}
           </>
         )}
         {[
@@ -305,11 +267,11 @@ export function Controls({ kind, settings: s, onChange }: Props) {
         {kind === 'scatter' && (
           <>
             {range('minArea', 'Минимальная площадь', 4, 90, ' px²')}
-            {select('connection', 'Соединение точек', [
-              ['none', 'Без линии'],
-              ['joint', 'По порядку записей'],
-              ['fitting', 'Линия тренда'],
-            ])}
+            {select(
+              'connection',
+              'Соединение точек',
+              settingOptions.connection
+            )}
           </>
         )}
         {kind === 'treemap' && (
@@ -329,15 +291,12 @@ export function Controls({ kind, settings: s, onChange }: Props) {
         )}
         {kind === 'funnel' && s.funnelLabels && (
           <>
-            {select('labelPosition', 'Положение подписей', [
-              ['right', 'Справа'],
-              ['center', 'Внутри'],
-              ['left', 'Слева'],
-            ])}
-            {select('labelField', 'Текст подписи', [
-              ['name', 'Название этапа'],
-              ['value', 'Количество'],
-            ])}
+            {select(
+              'labelPosition',
+              'Положение подписей',
+              settingOptions.labelPosition
+            )}
+            {select('labelField', 'Текст подписи', settingOptions.labelField)}
           </>
         )}
         {((kind === 'treemap' && s.tileLabels) ||
@@ -351,18 +310,12 @@ export function Controls({ kind, settings: s, onChange }: Props) {
         {hasMarkers && (
           <fieldset>
             <legend>Точки и наведение</legend>
-            {select('dotShape', 'Форма точки', [
-              ['circle', 'Круг'],
-              ['diamond', 'Ромб'],
-              ['square', 'Квадрат'],
-              ['triangle', 'Треугольник'],
-            ])}
-            {select('activeDotAppearance', 'Появление точки', [
-              ['none', 'Мгновенно'],
-              ['grow', 'Увеличение'],
-              ['fade', 'Проявление'],
-              ['pulse', 'Пульс'],
-            ])}
+            {select('dotShape', 'Форма точки', settingOptions.dotShape)}
+            {select(
+              'activeDotAppearance',
+              'Появление точки',
+              settingOptions.activeDotAppearance
+            )}
             {s.motion &&
               s.activeRadius > 0 &&
               s.activeDotAppearance !== 'none' &&
@@ -386,32 +339,21 @@ export function Controls({ kind, settings: s, onChange }: Props) {
         )}
         <fieldset>
           <legend>Легенда и подсказка</legend>
-          {select('legendPosition', 'Легенда', [
-            ['top', 'Сверху'],
-            ['bottom', 'Снизу'],
-            ['left', 'Слева'],
-            ['right', 'Справа'],
-            ['hidden', 'Скрыта'],
-          ])}
+          {select('legendPosition', 'Легенда', settingOptions.legendPosition)}
           {toggle('tooltipEnabled', 'Показывать подсказку')}
           {s.tooltipEnabled && (
             <>
-              {select('trigger', 'Открывать подсказку', [
-                ['hover', 'При наведении'],
-                ['click', 'По щелчку'],
-              ])}
-              {select('tooltipPosition', 'Положение подсказки', [
-                ['follow', 'У курсора'],
-                ['top-left', 'Сверху слева'],
-                ['top-right', 'Сверху справа'],
-                ['bottom-left', 'Снизу слева'],
-                ['bottom-right', 'Снизу справа'],
-              ])}
-              {select('tooltipAppearance', 'Появление подсказки', [
-                ['none', 'Мгновенно'],
-                ['fade', 'Проявление'],
-                ['rise', 'Сдвиг снизу'],
-              ])}
+              {select('trigger', 'Открывать подсказку', settingOptions.trigger)}
+              {select(
+                'tooltipPosition',
+                'Положение подсказки',
+                settingOptions.tooltipPosition
+              )}
+              {select(
+                'tooltipAppearance',
+                'Появление подсказки',
+                settingOptions.tooltipAppearance
+              )}
               {s.tooltipPosition === 'follow' &&
                 toggle('tooltipSmooth', 'Плавное движение за курсором')}
               {s.motion &&
@@ -429,18 +371,13 @@ export function Controls({ kind, settings: s, onChange }: Props) {
                 range('offset', 'Отступ от курсора', 0, 32, ' px')}
               {kind !== 'scatter' &&
                 kind !== 'radial' &&
-                select('tooltipKind', 'Содержимое подсказки', [
-                  ['standard', 'Стандартная'],
-                  ['formatted', 'С единицами'],
-                  ...(hasSeries
-                    ? [
-                        ['comparison', 'С отклонением'] as [
-                          'comparison',
-                          string
-                        ],
-                      ]
-                    : []),
-                ])}
+                select(
+                  'tooltipKind',
+                  'Содержимое подсказки',
+                  hasSeries
+                    ? settingOptions.tooltipKind
+                    : settingOptions.tooltipKind.slice(0, 2)
+                )}
               {kind === 'bar' &&
                 toggle('sharedTip', 'Сравнивать столбцы категории')}
             </>
@@ -548,10 +485,7 @@ export function Controls({ kind, settings: s, onChange }: Props) {
           <legend>Данные</legend>
           {(kind === 'line' || kind === 'area') && (
             <>
-              {select('period', 'Период', [
-                ['initial', 'Январь — декабрь'],
-                ['shifted', 'Февраль — январь'],
-              ])}
+              {select('period', 'Период', settingOptions.period)}
               {toggle('lineMissing', 'Пропуск в июне')}
               {s.lineMissing &&
                 toggle('connectNulls', 'Соединить через пропуск')}
@@ -568,35 +502,24 @@ export function Controls({ kind, settings: s, onChange }: Props) {
           {toggle('yVisible', 'Показывать ось Y')}
           {s.xVisible && (
             <>
-              {select('xSide', 'Положение оси X', [
-                ['bottom', 'Снизу'],
-                ['top', 'Сверху'],
-              ])}
+              {select('xSide', 'Положение оси X', settingOptions.xSide)}
               {range('xAngle', 'Наклон подписей X', -60, 60, '°', 5)}
             </>
           )}
           {s.yVisible &&
-            select('ySide', 'Положение оси Y', [
-              ['left', 'Слева'],
-              ['right', 'Справа'],
-            ])}
+            select('ySide', 'Положение оси Y', settingOptions.ySide)}
           {toggle('reverseX', 'Обратный порядок X')}
           {toggle('reverseY', 'Обратный порядок Y')}
           {(s.xVisible || s.yVisible) &&
             range('axisFont', 'Шрифт шкал', 9, 18, ' px')}
           {s.grid && (
             <>
-              {select('gridDirection', 'Линии сетки', [
-                ['auto', 'По ориентации графика'],
-                ['both', 'В обоих направлениях'],
-                ['horizontal', 'Горизонтальные'],
-                ['vertical', 'Вертикальные'],
-              ])}
-              {select('gridPattern', 'Штрих сетки', [
-                ['3 5', 'Пунктир'],
-                ['1 3', 'Точки'],
-                ['', 'Сплошной'],
-              ])}
+              {select(
+                'gridDirection',
+                'Линии сетки',
+                settingOptions.gridDirection
+              )}
+              {select('gridPattern', 'Штрих сетки', settingOptions.gridPattern)}
               {range('gridWidth', 'Толщина сетки', 1, 4, ' px')}
             </>
           )}
@@ -610,11 +533,7 @@ export function Controls({ kind, settings: s, onChange }: Props) {
             <>
               {range('delay', 'Задержка запуска', 0, 1200, ' мс', 50)}
               {range('duration', 'Длительность', 150, 1800, ' мс', 50)}
-              {select('easing', 'Переход', [
-                ['ease-out', 'С замедлением'],
-                ['ease-in-out', 'Плавный'],
-                ['linear', 'Линейный'],
-              ])}
+              {select('easing', 'Переход', settingOptions.easing)}
               {kind === 'line' && (
                 <p className="control-note">
                   При сдвиге периода точки сопоставляются по <code>id</code>.
