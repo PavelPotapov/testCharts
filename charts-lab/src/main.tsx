@@ -23,6 +23,9 @@ const Showcase = lazy(() =>
 const Capabilities = lazy(() =>
   import('./Capabilities').then((m) => ({ default: m.Capabilities }))
 );
+const Cards = lazy(() =>
+  import('./Cards').then((m) => ({ default: m.Cards }))
+);
 import { Controls } from './Controls';
 import { PresetBar } from './PresetBar';
 import { loadSaved, saveSettings, type ByKind } from './presets';
@@ -33,7 +36,8 @@ import './style.css';
 
 const kib = (n: number) =>
   (n / 1024).toLocaleString('ru-RU', { maximumFractionDigits: 1 });
-const typeLabel: Record<Kind, string> = {
+const typeLabel: Record<Kind | 'kpi', string> = {
+  kpi: 'Карточка KPI',
   composed: 'Комбинированная диаграмма',
   radial: 'Радиальная диаграмма',
   funnel: 'Воронка',
@@ -74,8 +78,8 @@ function Bundle() {
                   {r.mode === 'react'
                     ? 'Только React'
                     : r.mode === 'all'
-                    ? 'Все виды'
-                    : typeLabel[r.mode as Kind]}
+                    ? 'Все компоненты'
+                    : typeLabel[r.mode as keyof typeof typeLabel]}
                 </th>
                 <td>{kib(r.bytes)}</td>
                 <td>{kib(r.gzip)}</td>
@@ -142,6 +146,7 @@ function DataTable({ data }: { data: object[] }) {
 const sections = [
   { hash: '#showcase', label: 'Витрина' },
   { hash: '#lab', label: 'Лаборатория' },
+  { hash: '#cards', label: 'Карточки' },
   { hash: '#capabilities', label: 'Возможности' },
   { hash: '#sizes', label: 'Размер импорта' },
 ] as const;
@@ -260,11 +265,15 @@ function Lab() {
             <h1>
               {page.hash === '#showcase'
                 ? 'Витрина графиков'
+                : page.hash === '#cards'
+                ? 'Карточки с числами'
                 : 'Лаборатория графиков'}
             </h1>
             <p>
               {page.hash === '#showcase'
                 ? 'Выберите график, чтобы открыть его настройки в лаборатории.'
+                : page.hash === '#cards'
+                ? 'Компактная и крупный тренд в выбранном виде, светлая и тёмная тема рядом.'
                 : 'Настройте график, посмотрите код и оцените стоимость импорта.'}
             </p>
           </div>
@@ -397,6 +406,10 @@ function Lab() {
               <Controls kind={kind} settings={s} onChange={set} />
             </div>
           </>
+        ) : page.hash === '#cards' ? (
+          <Suspense fallback={<p role="status">Загрузка карточек…</p>}>
+            <Cards />
+          </Suspense>
         ) : page.hash === '#capabilities' ? (
           <Suspense
             fallback={<p role="status">Загрузка карты возможностей…</p>}

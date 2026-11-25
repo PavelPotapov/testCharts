@@ -145,9 +145,24 @@
     ]
   },
   {
+    "mode": "kpi",
+    "bytes": 575242,
+    "gzip": 171913,
+    "wrappers": [
+      "kpi"
+    ],
+    "engines": [
+      "AreaChart",
+      "BarChart",
+      "CartesianChart",
+      "CategoricalChart",
+      "RechartsWrapper"
+    ]
+  },
+  {
     "mode": "all",
-    "bytes": 779463,
-    "gzip": 223030,
+    "bytes": 793693,
+    "gzip": 227113,
     "wrappers": [
       "line",
       "area",
@@ -158,7 +173,8 @@
       "treemap",
       "composed",
       "radial",
-      "funnel"
+      "funnel",
+      "kpi"
     ],
     "engines": [
       "AreaChart",
