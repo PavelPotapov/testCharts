@@ -1,3 +1,4 @@
+import { apiComponents } from './apiComponents';
 import type { Kind } from './catalog';
 export interface Recipe {
   component: string;
@@ -160,4 +161,46 @@ export function nativeRecipe(kind: Kind): Recipe {
         [tip]
       );
   }
+}
+
+export function parseNativeRecipe(text: string, kind: Kind): Recipe {
+  const available = apiComponents(kind);
+  if (text.length > 50000)
+    throw Error('Размер примера ограничен 50 000 символами.');
+  const value = JSON.parse(text, (key, v) => {
+    if (
+      [
+        '__proto__',
+        'constructor',
+        'prototype',
+        'dangerouslySetInnerHTML',
+        'ref',
+        'portal',
+      ].includes(key) ||
+      /^on[A-Z]/.test(key)
+    )
+      throw Error('Это свойство задаётся из React-кода: ' + key);
+    return v;
+  });
+  function validate(node: Recipe, depth: number) {
+    if (!node || !available.includes(node.component) || depth > 12)
+      throw Error('Проверьте имя компонента и глубину вложения.');
+    if (
+      node.props !== undefined &&
+      (!node.props ||
+        typeof node.props !== 'object' ||
+        Array.isArray(node.props) ||
+        'children' in node.props)
+    )
+      throw Error(
+        'props должен быть объектом. Дочерние компоненты задаются в children.'
+      );
+    if (node.children !== undefined && !Array.isArray(node.children))
+      throw Error('children должен быть массивом компонентов.');
+    node.children?.forEach((child) => validate(child, depth + 1));
+  }
+  validate(value, 0);
+  if (value.component !== available[0])
+    throw Error('Корневой компонент для этого графика — ' + available[0]);
+  return value;
 }

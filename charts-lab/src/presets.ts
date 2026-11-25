@@ -1,4 +1,6 @@
 import type { ThemeName } from '@chart-lab/charts/theme';
+import { parseNativeRecipe } from './nativeRecipe';
+import { settingOptions } from './settingOptions';
 import {
   defaults,
   initialSettings,
@@ -54,19 +56,39 @@ export interface ParsedPreset {
   skipped: string[];
 }
 
-const isKind = (key: string): key is Kind =>
-  (kinds as string[]).includes(key);
+const isKind = (key: string): key is Kind => (kinds as string[]).includes(key);
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
+function isSettingValue(kind: Kind, key: string, value: unknown): boolean {
+  if (!Object.hasOwn(defaults, key) || key === 'theme') return false;
+  if (typeof value !== typeof defaults[key as keyof Settings]) return false;
+  if (typeof value === 'number') return Number.isFinite(value);
+  if (Object.hasOwn(settingOptions, key)) {
+    const options = settingOptions[key as keyof typeof settingOptions];
+    return options.some(([option]) => option === value);
+  }
+  if (key === 'nativeApplied' && typeof value === 'string' && value) {
+    try {
+      parseNativeRecipe(value, kind);
+    } catch {
+      return false;
+    }
+  }
+  return true;
+}
+
 // Принимает полный объект настройки или только блок views.
-// Неизвестные виды и параметры, а также значения другого типа пропускает.
 export function parsePreset(text: string): ParsedPreset {
   const raw: unknown = JSON.parse(text);
   if (!isRecord(raw)) throw new Error('Ожидается объект JSON');
-  const views = isRecord(raw.views) ? raw.views : raw;
+  if (raw.format !== undefined && raw.format !== presetFormat)
+    throw new Error('Неизвестная версия формата настроек');
+  const views = Object.hasOwn(raw, 'views') ? raw.views : raw;
+  if (!isRecord(views)) throw new Error('Поле views должно быть объектом');
   const result: ParsedPreset = { byKind: {}, applied: [], skipped: [] };
   if (raw.theme === 'light' || raw.theme === 'dark') result.theme = raw.theme;
+  else if (raw.theme !== undefined) result.skipped.push('theme');
   for (const [kind, changes] of Object.entries(views)) {
     if (['format', 'recharts', 'theme'].includes(kind)) continue;
     if (!isKind(kind) || !isRecord(changes)) {
@@ -75,16 +97,16 @@ export function parsePreset(text: string): ParsedPreset {
     }
     const next: Record<string, unknown> = { ...initialSettings(kind) };
     let count = 0;
-    for (const [key, value] of Object.entries(changes)) {
-      const known = key in defaults && key !== 'theme';
-      const base = (defaults as Record<string, unknown>)[key];
-      if (known && typeof value === typeof base) {
+    const entries = Object.entries(changes);
+    for (const [key, value] of entries) {
+      if (isSettingValue(kind, key, value)) {
         next[key] = value;
         count += 1;
       } else {
         result.skipped.push(kind + '.' + key);
       }
     }
+    if (entries.length && !count) continue;
     result.byKind[kind] = next as Settings;
     result.applied.push({ kind, count });
   }

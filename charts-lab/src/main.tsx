@@ -164,9 +164,7 @@ function currentSection() {
 function Lab() {
   const [saved] = useState(loadSaved);
   const [kind, setKind] = useState<Kind>('line');
-  const [theme, setTheme] = useState<Settings['theme']>(
-    saved.theme ?? 'light'
-  );
+  const [theme, setTheme] = useState<Settings['theme']>(saved.theme ?? 'light');
   const [byKind, setByKind] = useState<ByKind>(saved.byKind);
   useEffect(() => saveSettings(theme, byKind), [theme, byKind]);
   const s = { ...(byKind[kind] ?? initialSettings(kind)), theme };
@@ -317,7 +315,7 @@ function Lab() {
               onImport={(nextTheme, imported, first) => {
                 setByKind((previous) => ({ ...previous, ...imported }));
                 if (nextTheme) setTheme(nextTheme);
-                if (!imported[kind]) setKind(first);
+                if (first && !imported[kind]) setKind(first);
               }}
             />
             <div className="workspace">
