@@ -36,7 +36,8 @@ import './style.css';
 
 const kib = (n: number) =>
   (n / 1024).toLocaleString('ru-RU', { maximumFractionDigits: 1 });
-const typeLabel: Record<Kind, string> = {
+const typeLabel: Record<Kind | 'kpi', string> = {
+  kpi: 'Карточка KPI',
   composed: 'Комбинированная диаграмма',
   radial: 'Радиальная диаграмма',
   funnel: 'Воронка',
@@ -77,8 +78,8 @@ function Bundle() {
                   {r.mode === 'react'
                     ? 'Только React'
                     : r.mode === 'all'
-                    ? 'Все виды'
-                    : typeLabel[r.mode as Kind]}
+                    ? 'Все компоненты'
+                    : typeLabel[r.mode as keyof typeof typeLabel]}
                 </th>
                 <td>{kib(r.bytes)}</td>
                 <td>{kib(r.gzip)}</td>

@@ -11,12 +11,16 @@ const kinds = Object.keys(manifest.exports)
 const results = [];
 for (const mode of ['react', ...kinds, 'all']) {
   const selected = mode === 'react' ? [] : mode === 'all' ? kinds : [mode];
+  const components = selected.map((_, i) => `Component${i}`);
   const imports = selected
-    .map((key, i) => `import * as C${i} from '@chart-lab/charts/${key}';`)
+    .map((key, i) => {
+      const name =
+        key === 'kpi'
+          ? 'KpiCard'
+          : key[0].toUpperCase() + key.slice(1) + 'Chart';
+      return `import { ${name} as ${components[i]} } from '@chart-lab/charts/${key}';`;
+    })
     .join('\n');
-  const components = selected.map(
-    (key, i) => `C${i}.${key[0].toUpperCase() + key.slice(1)}Chart`
-  );
   const withTheme = selected.length > 0;
   const themeImport = withTheme
     ? "import { chartThemes } from '@chart-lab/charts/theme';"
